@@ -13,6 +13,7 @@ var HDNode = require('./hdnode');
 var networks = require('bitcoinjs-lib/src/networks');
 var Util = require('./util');
 var Q = require('q');
+var ledger = require('ledger-api');
 
 //
 // Constructor
@@ -295,6 +296,83 @@ Wallets.prototype.createWalletWithKeychains = function(params, callback) {
       backupKeychain: backupKeychain,
       bitgoKeychain: bitgoKeychain,
       warning: 'Be sure to backup the backup keychain -- it is not stored anywhere else!'
+    };
+  })
+  .nodeify(callback);
+};
+
+Wallets.prototype.createWalletWithKeychainsLedger = function(params, callback) {
+  params = params || {};
+  common.validateParams(params, [], ['ledgerPath', 'label', 'backupXpub', 'enterprise'], callback);
+
+  var self = this;
+  var label = params.label;
+
+  // Query the user key
+  if (!params.ledger) {
+    throw new Error("Missing ledger parameter passing the dongle object");
+  }
+  var ledgerPath = params.ledgerPath;
+  if (!ledgerPath) {
+    ledgerPath = "44'/0'/0'";
+  }
+  var ledgerXpub;
+
+  // Create the backup key.
+  var backupKeychain = { "xpub" : params.backupXpub };
+  if (!params.backupXpub) {
+    backupKeychain = this.bitgo.keychains().create();
+  }
+
+  var bitgoKeychain;
+
+  // Add keychains to BitGo
+  var key1Params = {
+  };
+  var userKeychain = {    
+    'ledgerPath' : ledgerPath
+  };
+
+  return ledger.Utils.getXpub_async(params.ledger, ledgerPath, true) // modify when not using testnet
+  .then(function(xpub) {
+      ledgerXpub = xpub;
+      key1Params['xpub'] = xpub;
+      userKeychain['xpub'] = xpub;
+      return self.bitgo.keychains().add(key1Params)
+  })  
+  .then(function(keychain) {
+    var key2Params = {
+      "xpub": backupKeychain.xpub
+    };
+    return self.bitgo.keychains().add(key2Params);
+  })
+  .then(function(keychain) {
+    return self.bitgo.keychains().createBitGo();
+  })
+  .then(function(keychain) {
+    bitgoKeychain = keychain;
+    var walletParams = {
+      "label": label,
+      "m": 2,
+      "n": 3,
+      "keychains": [
+        { "xpub": userKeychain.xpub },
+        { "xpub": backupKeychain.xpub },
+        { "xpub": bitgoKeychain.xpub} ]
+    };
+
+    if (params.enterprise) {
+      walletParams.enterprise = params.enterprise;
+    }
+
+    return self.add(walletParams);
+  })
+  .then(function(result) {
+    return {
+      wallet: result,
+      userKeychain: userKeychain,
+      backupKeychain: backupKeychain,
+      bitgoKeychain: bitgoKeychain,
     };
   })
   .nodeify(callback);

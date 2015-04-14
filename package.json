@@ -66,6 +66,7 @@
     "minimist": "0.2.0",
     "q": "1.1.2",
     "superagent": "0.18.0",
-    "underscore.string": "2.4.0"
+    "underscore.string": "2.4.0",
+    "ledger-api": "1.0.0"
   }
 }
