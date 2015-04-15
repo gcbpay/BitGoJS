@@ -314,7 +314,8 @@ Wallets.prototype.createWalletWithKeychainsLedger = function(params, callback) {
   }
   var ledgerPath = params.ledgerPath;
   if (!ledgerPath) {
-    ledgerPath = "44'/0'/0'";
+    //ledgerPath = "44'/0'/0'"; // full BIP44 path takes too long to derive
+    ledgerPath = "44'/0'";
   }
   var ledgerXpub;
 
@@ -333,12 +334,12 @@ Wallets.prototype.createWalletWithKeychainsLedger = function(params, callback) {
     'ledgerPath' : ledgerPath
   };
 
-  return ledger.Utils.getXpub_async(params.ledger, ledgerPath, true) // modify when not using testnet
+  return ledger.Utils.getXpub_async(params.ledger, ledgerPath, false) // false indicates mainnet
   .then(function(xpub) {
-      ledgerXpub = xpub;
-      key1Params['xpub'] = xpub;
-      userKeychain['xpub'] = xpub;
-      return self.bitgo.keychains().add(key1Params)
+    ledgerXpub = xpub;
+    key1Params['xpub'] = xpub;
+    userKeychain['xpub'] = xpub;
+    return self.bitgo.keychains().add(key1Params)
   })  
   .then(function(keychain) {
     var key2Params = {
