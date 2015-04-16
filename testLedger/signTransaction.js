@@ -26,52 +26,52 @@ var dongle;
 var remote;
 ledger.Utils.getFirstDongle_async().
 then(function(res) { 
-	dongle = res;
-	return dongle.verifyPin_async(new ledger.ByteString("1234", ledger.GP.ASCII));
+  dongle = res;
+  return dongle.verifyPin_async(new ledger.ByteString("1234", ledger.GP.ASCII));
 }).
 then(function(res) {
-	splitTransaction = dongle.splitTransaction(TX_TOSIGN);
-	dongle.displayTransactionDebug(splitTransaction);
-	var inputs = [];
-	var scripts = [];
-	var inputs = [
-	  [ new ledger.ByteString("71f97fa2a21486ecd99674a8ae068d92acd2e9db49c199473be39984e6cbe0f6", ledger.GP.HEX),
-	    new ledger.ByteString("00000000", ledger.GP.HEX) ],
-	  [ new ledger.ByteString("171e6a969ff196a2cfaaba4780c292e33fc297672a065cc5c5c684727cf9e3ba", ledger.GP.HEX),
-	    new ledger.ByteString("00000001", ledger.GP.HEX) ]
-	];
-	var scripts = [ 
-		new ledger.ByteString("52210289b4a3ad52a919abd2bdd6920d8a6879b1e788c38aa76f0440a6f32a9f1996d02103a3393b1439d1693b063482c04bd40142db97bdf139eedd1b51ffb7070a37eac321030b9a409a1e476b0d5d17b804fcdb81cf30f9b99c6f3ae1178206e08bc500639853ae", ledger.GP.HEX),
-	    new ledger.ByteString("522102afe2165371442437b86089a17e8d1c26d127e3723b19f568e9c11e326946111521032d139518b16c112d5f1a52157f1468c0b7a570c41673debee8cd2e53eb084df12103b13fe78b0320ceb77795c87ed72069f12edf64169d15f8f9827f0bb4fdbe760f53ae", ledger.GP.HEX)
-	];		
-	var paths = [
-		"44'/0'/0'/0/0/0/1",
-		"44'/0'/0'/0/0/0/2",
-	];
-	return dongle.signP2SHTransaction_async(inputs, scripts, splitTransaction.outputs.length, splitTransaction.outputScript, paths);
-	/*	
-	return Q.fcall(function() {
-		return [ new ledger.ByteString('3045022100a58e83b20da4fa8997f76b6c998b91d528c042f1238415b9df60db4a12511f8d022062f99d64388999aa1f2280919fea297622a918bcdd4c49fb7892fbb90de8935563', ledger.GP.HEX),
-  				 new ledger.ByteString('3045022100c8a1d17960637f1558f54bc58e0d70b6b6a325865843275e212150d865dbcd3902201504524f3fd20950a431299cdb4c7f16b0499c0d824c720a138ef4a0c5b055980a', ledger.GP.HEX) ];
+  splitTransaction = dongle.splitTransaction(TX_TOSIGN);
+  dongle.displayTransactionDebug(splitTransaction);
+  var inputs = [];
+  var scripts = [];
+  var inputs = [
+    [ new ledger.ByteString("71f97fa2a21486ecd99674a8ae068d92acd2e9db49c199473be39984e6cbe0f6", ledger.GP.HEX),
+      new ledger.ByteString("00000000", ledger.GP.HEX) ],
+    [ new ledger.ByteString("171e6a969ff196a2cfaaba4780c292e33fc297672a065cc5c5c684727cf9e3ba", ledger.GP.HEX),
+      new ledger.ByteString("00000001", ledger.GP.HEX) ]
+  ];
+  var scripts = [ 
+    new ledger.ByteString("52210289b4a3ad52a919abd2bdd6920d8a6879b1e788c38aa76f0440a6f32a9f1996d02103a3393b1439d1693b063482c04bd40142db97bdf139eedd1b51ffb7070a37eac321030b9a409a1e476b0d5d17b804fcdb81cf30f9b99c6f3ae1178206e08bc500639853ae", ledger.GP.HEX),
+      new ledger.ByteString("522102afe2165371442437b86089a17e8d1c26d127e3723b19f568e9c11e326946111521032d139518b16c112d5f1a52157f1468c0b7a570c41673debee8cd2e53eb084df12103b13fe78b0320ceb77795c87ed72069f12edf64169d15f8f9827f0bb4fdbe760f53ae", ledger.GP.HEX)
+  ];    
+  var paths = [
+    "44'/0'/0'/0/0/0/1",
+    "44'/0'/0'/0/0/0/2",
+  ];
+  return dongle.signP2SHTransaction_async(inputs, scripts, splitTransaction.outputs.length, splitTransaction.outputScript, paths);
+  /*  
+  return Q.fcall(function() {
+    return [ new ledger.ByteString('3045022100a58e83b20da4fa8997f76b6c998b91d528c042f1238415b9df60db4a12511f8d022062f99d64388999aa1f2280919fea297622a918bcdd4c49fb7892fbb90de8935563', ledger.GP.HEX),
+           new ledger.ByteString('3045022100c8a1d17960637f1558f54bc58e0d70b6b6a325865843275e212150d865dbcd3902201504524f3fd20950a431299cdb4c7f16b0499c0d824c720a138ef4a0c5b055980a', ledger.GP.HEX) ];
 
-	});
-	*/
+  });
+  */
 }).
 then(function(res) {
-	console.log(res);
-	var signatures = res;
-	var scripts = [ 
-		new ledger.ByteString("52210289b4a3ad52a919abd2bdd6920d8a6879b1e788c38aa76f0440a6f32a9f1996d02103a3393b1439d1693b063482c04bd40142db97bdf139eedd1b51ffb7070a37eac321030b9a409a1e476b0d5d17b804fcdb81cf30f9b99c6f3ae1178206e08bc500639853ae", ledger.GP.HEX),
-	    new ledger.ByteString("522102afe2165371442437b86089a17e8d1c26d127e3723b19f568e9c11e326946111521032d139518b16c112d5f1a52157f1468c0b7a570c41673debee8cd2e53eb084df12103b13fe78b0320ceb77795c87ed72069f12edf64169d15f8f9827f0bb4fdbe760f53ae", ledger.GP.HEX)
-	];			
-	for (var i=0; i<splitTransaction.inputs.length; i++) {
-		splitTransaction.inputs[i]['script'] = dongle.formatP2SHInputScript(scripts[i], [ signatures[i] ]);
-	}
-	var tx = dongle.serializeTransaction(splitTransaction);
-	console.log(tx.toString(ledger.GP.HEX));
+  console.log(res);
+  var signatures = res;
+  var scripts = [ 
+    new ledger.ByteString("52210289b4a3ad52a919abd2bdd6920d8a6879b1e788c38aa76f0440a6f32a9f1996d02103a3393b1439d1693b063482c04bd40142db97bdf139eedd1b51ffb7070a37eac321030b9a409a1e476b0d5d17b804fcdb81cf30f9b99c6f3ae1178206e08bc500639853ae", ledger.GP.HEX),
+      new ledger.ByteString("522102afe2165371442437b86089a17e8d1c26d127e3723b19f568e9c11e326946111521032d139518b16c112d5f1a52157f1468c0b7a570c41673debee8cd2e53eb084df12103b13fe78b0320ceb77795c87ed72069f12edf64169d15f8f9827f0bb4fdbe760f53ae", ledger.GP.HEX)
+  ];      
+  for (var i=0; i<splitTransaction.inputs.length; i++) {
+    splitTransaction.inputs[i]['script'] = dongle.formatP2SHInputScript(scripts[i], [ signatures[i] ]);
+  }
+  var tx = dongle.serializeTransaction(splitTransaction);
+  console.log(tx.toString(ledger.GP.HEX));
 
-})
+}).
 fail(function(err) {
-	console.log("FAIL");
-	console.log(err);
+  console.log("FAIL");
+  console.log(err);
 })
