@@ -21,6 +21,11 @@ var sendingAddress = config.sendingAddress;
 var password = config.password;
 var amountSatoshis = config.amountSatoshis;
 var setInterval = config.setInterval;
+
+if (!sendingAddress || !password || !amountSatoshis || !setInterval) {
+  console.log('ERROR: Please ensure your configuration variables are set in config.js');
+};
+
 var count = 0;
 
 function setDestinationAddress () {
