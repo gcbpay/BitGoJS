@@ -7,10 +7,13 @@
 var superagent = require('superagent');
 var bitcoin = require('./bitcoin');
 var Blockchain = require('./blockchain');
+var EthBlockchain = require('./eth/ethBlockchain');
 var Keychains = require('./keychains');
 var TravelRule = require('./travelRule');
 var Wallet = require('./wallet');
+var EthWallet = require('./eth/ethWallet');
 var Wallets = require('./wallets');
+var EthWallets = require('./eth/ethWallets');
 var Markets = require('./markets');
 var PendingApprovals = require('./pendingapprovals');
 var sjcl = require('./sjcl.min');
@@ -917,6 +920,17 @@ BitGo.prototype.blockchain = function() {
 };
 
 //
+// EthBlockchain
+// Get the Ethereum blockchain object.
+//
+BitGo.prototype.ethBlockchain = function() {
+  if (!this._ethBlockchain) {
+    this._ethBlockchain = new EthBlockchain(this);
+  }
+  return this._ethBlockchain;
+};
+
+//
 // keychains
 // Get the user's keychains object.
 //
@@ -936,6 +950,17 @@ BitGo.prototype.wallets = function() {
     this._wallets = new Wallets(this);
   }
   return this._wallets;
+};
+
+//
+// wallets
+// Get the user's wallets object.
+//
+BitGo.prototype.ethWallets = function() {
+  if (!this._ethWallets) {
+    this._ethWallets = new EthWallets(this);
+  }
+  return this._ethWallets;
 };
 
 //
@@ -967,6 +992,15 @@ BitGo.prototype.pendingApprovals = function( ) {
 //
 BitGo.prototype.newWalletObject = function(walletParams) {
   return new Wallet(this, walletParams);
+};
+
+//
+// newWalletObject
+// A factory method to create a new EthWallet object, initialized with the wallet params
+// Can be used to reconstitute a wallet from cached data
+//
+BitGo.prototype.newEthWalletObject = function(walletParams) {
+  return new EthWallet(this, walletParams);
 };
 
 BitGo.prototype.url = function(path) {
