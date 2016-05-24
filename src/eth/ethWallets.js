@@ -281,7 +281,7 @@ EthWallets.prototype.createKey = function(params) {
 // Parameters include:
 //   "passphrase": wallet passphrase to encrypt user and backup keys with
 //   "label": wallet label, is shown in BitGo UI
-//   "backupXpub": backup keychain xpub, it is HIGHLY RECOMMENDED you generate this on a separate machine!
+//   "backupAddress": backup ethereum address, it is HIGHLY RECOMMENDED you generate this on a separate machine!
 //                 BITGO DOES NOT GUARANTEE SAFETY OF WALLETS WITH MULTIPLE KEYS CREATED ON THE SAME MACHINE **
 //   "backupXpubProvider": Provision backup key from this provider (KRS), e.g. "keyternal".
 //                         Setting this value will create an instant-capable wallet.
@@ -293,15 +293,16 @@ EthWallets.prototype.createKey = function(params) {
 // ** BE SURE TO BACK UP THE ENCRYPTED USER AND BACKUP KEYCHAINS!**
 //
 // }
-EthWallets.prototype.createWalletWithKeychains = function(params, callback) {
+EthWallets.prototype.createWallet = function(params, callback) {
   params = params || {};
-  common.validateParams(params, ['passphrase'], ['label', 'backupXpub', 'enterprise'], callback);
+  common.validateParams(params, ['passphrase'], ['label', 'backupAddress', 'enterprise'], callback);
   var self = this;
   var label = params.label;
 
   // Create the user and backup key.
   var userKeychain = this.bitgo.keychains().create();
   userKeychain.encryptedXprv = this.bitgo.encrypt({ password: params.passphrase, input: userKeychain.xprv });
+  var userAddress = Util.xpubToEthAddress(userKeychain.xpub);
 
   if ((!!params.backupXpub + !!params.backupXpubProvider) > 1) {
     throw new Error("Cannot provide more than one backupXpub or backupXpubProvider flag");
@@ -312,15 +313,16 @@ EthWallets.prototype.createWalletWithKeychains = function(params, callback) {
   }
 
   var backupKeychain;
-  var bitgoKeychain;
+  var backupAddress;
+  var bitgoAddress = self.bitgo.getConstants().bitgoEthAddress;
 
   // Add the user keychain
-  return self.bitgo.keychains().add({
+  var userKeychainPromise = self.bitgo.keychains().add({
     "xpub": userKeychain.xpub,
     "encryptedXprv": userKeychain.encryptedXprv
-  })
-  .then(function() {
-    // Add the backup keychain
+  });
+
+  var backupKeychainPromise = Q.fcall(function(){
     if (params.backupXpubProvider) {
       // If requested, use a KRS or backup key provider
       return self.bitgo.keychains().createBackup({
@@ -332,29 +334,40 @@ EthWallets.prototype.createWalletWithKeychains = function(params, callback) {
       });
     }
 
-    if (params.backupXpub) {
-      // user provided backup xpub
-      backupKeychain = { "xpub" : params.backupXpub };
+    if (params.backupAddress) {
+      // user provided backup ethereum address
+      backupAddress = params.backupAddress;
     } else {
       // no provided xpub, so default to creating one here
       backupKeychain = self.bitgo.keychains().create();
     }
 
-    return self.bitgo.keychains().add(backupKeychain);
-  })
-  .then(function() {
-    return self.bitgo.keychains().createBitGo();
-  })
+    if (backupKeychain) {
+      backupAddress = Util.xpubToEthAddress(backupKeychain.xpub);
+      return self.bitgo.keychains().add(backupKeychain);
+    }
+  });
+
+  var bitgoKeychainPromise = self.bitgo.keychains().createBitGo({ type: 'eth' })
   .then(function(keychain) {
-    bitgoKeychain = keychain;
+    if (keychain.ethAddress) {
+      // TODO: once server starts supporting this, remove the constants() call
+      bitgoAddress = keychain.ethAddress;
+    }
+  });
+
+  // parallelize the independent keychain retrievals/syncs
+  return Q.all([userKeychainPromise, backupKeychainPromise, bitgoKeychainPromise])
+  .then(function() {
     var walletParams = {
       "label": label,
       "m": 2,
       "n": 3,
-      "keychains": [
-        { "xpub": userKeychain.xpub },
-        { "xpub": backupKeychain.xpub },
-        { "xpub": bitgoKeychain.xpub} ]
+      "addresses": [
+        userAddress,
+        backupAddress,
+        bitgoAddress
+      ]
     };
 
     if (params.enterprise) {
@@ -371,78 +384,16 @@ EthWallets.prototype.createWalletWithKeychains = function(params, callback) {
     var result = {
       wallet: newWallet,
       userKeychain: userKeychain,
-      backupKeychain: backupKeychain,
-      bitgoKeychain: bitgoKeychain
+      backupKeychain: backupKeychain
     };
 
     if (backupKeychain.xprv) {
-      result.warning = 'Be sure to backup the backup keychain -- it is not stored anywhere else!';
+      result.warning = 'Be sure to back up the backup keychain -- it is not stored anywhere else!';
     }
 
     return result;
   })
   .nodeify(callback);
-};
-
-//
-// createForwardWallet
-// Creates a forward wallet from a single private key.
-// BitGo will watch the wallet and send any incoming transactions to a destination multi-sig wallet
-// WARNING: THE PRIVATE KEY WILL BE SENT TO BITGO. YOU MUST CONTACT BITGO BEFORE USING THIS FEATURE!
-// WE CANNOT GUARANTEE THE SECURITY OF SINGLE-SIG WALLETS AS CUSTODY IS UNCLEAR.
-//
-// Params:
-//    privKey - the private key on a legacy single-signature wallet to be watched (WIF format)
-//    sourceAddress - the bitcoin address to forward from (corresponds to the private key)
-//    destinationWallet - the wallet object to send the destination coins to (when incoming transactions are detected)
-//    label - label for the wallet
-//
-EthWallets.prototype.createForwardWallet = function(params, callback) {
-  params = params || {};
-  common.validateParams(params, ['privKey', 'sourceAddress'], ['label'], callback);
-
-  if (!params.destinationWallet || typeof(params.destinationWallet) != 'object' || !params.destinationWallet.id) {
-    throw new Error('expecting destinationWallet object');
-  }
-
-  var self = this;
-
-  var newDestinationAddress;
-  var addressFromPrivKey;
-
-  try {
-    var key = bitcoin.ECPair.fromWIF(params.privKey, bitcoin.getNetwork());
-    addressFromPrivKey = key.getAddress();
-  } catch (e) {
-    throw new Error('expecting a valid privKey');
-  }
-
-  if (addressFromPrivKey !== params.sourceAddress) {
-    throw new Error('privKey does not match source address - got ' + addressFromPrivKey + ' expected ' + params.sourceAddress);
-  }
-
-  return params.destinationWallet.createAddress()
-  .then(function(result) {
-    // Create new address on the destination wallet to receive coins
-    newDestinationAddress = result.address;
-
-    var walletParams = {
-      type: 'forward',
-      sourceAddress: params.sourceAddress,
-      destinationAddress: newDestinationAddress,
-      privKey: params.privKey,
-      label: params.label
-    };
-
-    if (params.enterprise) {
-      walletParams.enterprise = params.enterprise;
-    }
-
-    return self.bitgo.post(self.bitgo.url('/eth/wallet'))
-    .send(walletParams)
-    .result()
-    .nodeify(callback);
-  });
 };
 
 //
@@ -458,7 +409,7 @@ EthWallets.prototype.add = function(params, callback) {
   params = params || {};
   common.validateParams(params, [], ['label', 'enterprise'], callback);
 
-  if (Array.isArray(params.keychains) === false || typeof(params.m) !== 'number' ||
+  if (Array.isArray(params.addresses) === false || typeof(params.m) !== 'number' ||
     typeof(params.n) != 'number') {
     throw new Error('invalid argument');
   }
@@ -469,14 +420,13 @@ EthWallets.prototype.add = function(params, callback) {
   }
 
   var self = this;
-  var addresses = params.keychains.map(function(k) {
-    return Util.xpubToEthAddress(k.xpub);
-  });
+  var addresses = params.addresses;
   var walletParams = {
     label: params.label,
     m: params.m,
     n: params.n,
-    addresses: addresses
+    addresses: addresses,
+    type: 'eth'
   };
 
   if (params.enterprise) {

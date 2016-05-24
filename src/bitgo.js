@@ -159,6 +159,7 @@ var BitGo = function(params) {
   this.env = params.env;
 
   common.setNetwork(common.Environments[params.env].network);
+  common.setEthNetwork(common.Environments[params.env].ethNetwork);
 
   if (!this._baseUrl) {
     this._baseUrl = common.Environments[params.env].uri;
@@ -1125,16 +1126,20 @@ BitGo.prototype.fetchConstants = function(params, callback) {
 BitGo.prototype.getConstants = function(params) {
   params = params || {};
 
+  // TODO: once server starts returning eth address keychains, remove bitgoEthAddress
   var defaultConstants = {
     maxFee: 0.1e8,
     maxFeeRate: 100000,
     minFeeRate: 2000,
     fallbackFeeRate: 20000,
-    minOutputSize: 2730
+    minOutputSize: 2730,
+    bitgoEthAddress: '0x0f47ea803926926f299b7f1afc8460888d850f47'
   };
 
   this.fetchConstants(params);
-  return this._constants || defaultConstants;
+  
+  // use defaultConstants as the backup for keys that are not set in this._constants
+  return _.merge({}, defaultConstants, this._constants);
 };
 
 module.exports = BitGo;

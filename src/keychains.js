@@ -142,7 +142,7 @@ Keychains.prototype.createBitGo = function(params, callback) {
   common.validateParams(params, [], [], callback);
 
   return this.bitgo.post(this.bitgo.url('/keychain/bitgo'))
-  .send({})
+  .send(params)
   .result()
   .nodeify(callback);
 };
@@ -189,7 +189,7 @@ Keychains.prototype.update = function(params, callback) {
 
   return this.bitgo.put(this.bitgo.url('/keychain/' + params.xpub))
   .send({
-    encryptedXprv: params.encryptedXprv,
+    encryptedXprv: params.encryptedXprv
   })
   .result()
   .nodeify(callback);
