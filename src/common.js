@@ -10,36 +10,31 @@ exports.Environments = {
     uri: 'https://staging.bitgo.com',
     network: 'bitcoin',
     ethNetwork: 'ethereum',
-    signingAddress: '1BitGo3gxRZ6mQSEH52dvCKSUgVCAH4Rja',
-    ethSigningAddress: '0x0f47ea803926926f299b7f1afc8460888d850f47'
+    signingAddress: '1BitGo3gxRZ6mQSEH52dvCKSUgVCAH4Rja'
   },
   test: {
     uri: 'https://test.bitgo.com',
     network: 'testnet',
     ethNetwork: 'ethereum',
-    signingAddress: 'msignBdFXteehDEgB6DNm7npRt7AcEZJP3',
-    ethSigningAddress: '0x0f47ea803926926f299b7f1afc8460888d850f47'
+    signingAddress: 'msignBdFXteehDEgB6DNm7npRt7AcEZJP3'
   },
   dev: {
     uri: 'https://webdev.bitgo.com',
     network: 'testnet',
     ethNetwork: 'ethereum',
-    signingAddress: 'msignBdFXteehDEgB6DNm7npRt7AcEZJP3',
-    ethSigningAddress: '0x0f47ea803926926f299b7f1afc8460888d850f47'
+    signingAddress: 'msignBdFXteehDEgB6DNm7npRt7AcEZJP3'
   },
   local: {
     uri: 'http://localhost:3000',
     network: 'testnet',
     ethNetwork: 'ethereum',
-    signingAddress: 'msignBdFXteehDEgB6DNm7npRt7AcEZJP3',
-    ethSigningAddress: '0x0f47ea803926926f299b7f1afc8460888d850f47'
+    signingAddress: 'msignBdFXteehDEgB6DNm7npRt7AcEZJP3'
   },
   custom: {
     uri: process.env.BITGO_CUSTOM_ROOT_URI,
     network: process.env.BITGO_CUSTOM_BITCOIN_NETWORK || 'bitcoin',
     ethNetwork: process.env.BITGO_CUSTOM_ETHEREUM_NETWORK || 'ethereum',
-    signingAddress: '1BitGo3gxRZ6mQSEH52dvCKSUgVCAH4Rja',
-    ethSigningAddress: '0x0f47ea803926926f299b7f1afc8460888d850f47'
+    signingAddress: '1BitGo3gxRZ6mQSEH52dvCKSUgVCAH4Rja'
   }
 };
 
