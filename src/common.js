@@ -3,8 +3,7 @@ exports.Environments = {
     uri: 'https://www.bitgo.com',
     network: 'bitcoin',
     ethNetwork: 'ethereum',
-    signingAddress: '1BitGo3gxRZ6mQSEH52dvCKSUgVCAH4Rja',
-    ethSigningAddress: '0x0f47ea803926926f299b7f1afc8460888d850f47'
+    signingAddress: '1BitGo3gxRZ6mQSEH52dvCKSUgVCAH4Rja'
   },
   staging: {
     uri: 'https://staging.bitgo.com',
