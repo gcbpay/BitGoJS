@@ -249,24 +249,6 @@ EthWallets.prototype.acceptShare = function(params, callback) {
 };
 
 //
-// createKey
-// Create a single bitcoin key.  This runs locally.
-// Returns: {
-//   address: <address>
-//   key: <key, in WIF format>
-// }
-EthWallets.prototype.createKey = function(params) {
-  params = params || {};
-  common.validateParams(params);
-
-  var key = bitcoin.makeRandomKey();
-  return {
-    address: key.getAddress(),
-    key: key.toWIF()
-  };
-};
-
-//
 // createWalletWithKeychains
 // Create a new 2-of-3 wallet and it's associated keychains.
 // Returns the locally created keys with their encrypted xprvs.
