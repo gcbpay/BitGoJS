@@ -323,7 +323,9 @@ EthWallets.prototype.createWallet = function(params, callback) {
       // no provided xpub, so default to creating one here
       backupKeychain = self.bitgo.keychains().create();
     }
-
+  })
+  .then(function() {
+    // the backup keychain may have only been created after the KRS call was completed
     if (backupKeychain) {
       backupAddress = Util.xpubToEthAddress(backupKeychain.xpub);
       return self.bitgo.keychains().add(backupKeychain);

@@ -64,9 +64,11 @@ Keychains.prototype.create = function(params) {
   }
 
   var extendedKey = bitcoin.HDNode.fromSeedBuffer(seed);
+  var xpub = extendedKey.neutered().toBase58();
   return {
-    xpub: extendedKey.neutered().toBase58(),
-    xprv: extendedKey.toBase58()
+    xpub: xpub,
+    xprv: extendedKey.toBase58(),
+    ethAddress: Util.xpubToEthAddress(xpub)
   };
 };
 
