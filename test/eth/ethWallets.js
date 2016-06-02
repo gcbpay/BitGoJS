@@ -233,14 +233,14 @@ describe('Ethereum Wallets API:', function() {
       });
     });
 
-    it('create with cold backup xpub', function(done) {
+    it('create with cold backup eth address', function(done) {
 
       // Simulate a cold backup key
       var coldBackupKey = bitgo.keychains().create();
       var options = {
         "passphrase": TestBitGo.TEST_WALLET1_PASSCODE,
         "label": TEST_WALLET_LABEL,
-        "backupXpub": coldBackupKey.xpub
+        "backupAddress": Util.xpubToEthAddress(coldBackupKey.xpub)
       };
 
       bitgo.ethWallets().createWallet(options, function(err, result) {
