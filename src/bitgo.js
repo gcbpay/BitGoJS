@@ -32,7 +32,7 @@ if (!process.browser) {
 var _end = superagent.Request.prototype.end;
 superagent.Request.prototype.end = function(cb) {
   var self = this;
-  if (typeof cb === 'function') return _end.call(self, cb)
+  if (typeof cb === 'function') return _end.call(self, cb);
 
   return new Q.Promise(function(resolve, reject) {
     var error;
@@ -80,18 +80,18 @@ superagent.Request.prototype.result = function(optionalField) {
   };
 
   return this.then(
-    function(res) {
-      if (typeof(res.status) === 'number' && res.status >= 200 && res.status < 300) {
-        return optionalField ? res.body[optionalField] : res.body;
-      }
-      throw errFromResponse(res);
-    },
-    function(e) {
-      if (e.response) {
-        throw errFromResponse(e.response);
-      }
-      throw e;
+  function(res) {
+    if (typeof(res.status) === 'number' && res.status >= 200 && res.status < 300) {
+      return optionalField ? res.body[optionalField] : res.body;
     }
+    throw errFromResponse(res);
+  },
+  function(e) {
+    if (e.response) {
+      throw errFromResponse(e.response);
+    }
+    throw e;
+  }
   );
 };
 
@@ -105,7 +105,7 @@ var testNetWarningMessage = false;
 var BitGo = function(params) {
   params = params || {};
   if (!common.validateParams(params, [], ['clientId', 'clientSecret', 'refreshToken', 'accessToken', 'userAgent', 'customRootURI', 'customBitcoinNetwork']) ||
-      (params.useProduction && typeof(params.useProduction) != 'boolean')) {
+  (params.useProduction && typeof(params.useProduction) != 'boolean')) {
     throw new Error('invalid argument');
   }
 
@@ -127,10 +127,10 @@ var BitGo = function(params) {
   }
 
   if (params.customRootURI ||
-      params.customBitcoinNetwork ||
-      params.customSigningAddress ||
-      process.env.BITGO_CUSTOM_ROOT_URI ||
-      process.env.BITGO_CUSTOM_BITCOIN_NETWORK) {
+  params.customBitcoinNetwork ||
+  params.customSigningAddress ||
+  process.env.BITGO_CUSTOM_ROOT_URI ||
+  process.env.BITGO_CUSTOM_BITCOIN_NETWORK) {
     params.env = 'custom';
     if (params.customRootURI) {
       common.Environments['custom'].uri = params.customRootURI;
@@ -224,6 +224,43 @@ var BitGo = function(params) {
   this.fetchConstants();
 };
 
+BitGo.prototype.eth = function() {
+  var self = this;
+
+  var ethBlockchain = function() {
+    if (!self._ethBlockchain) {
+      self._ethBlockchain = new EthBlockchain(self);
+    }
+    return self._ethBlockchain;
+  };
+
+  var ethWallets = function() {
+    if (!self._ethWallets) {
+      self._ethWallets = new EthWallets(self);
+    }
+    return self._ethWallets;
+  };
+
+  var newEthWalletObject = function(walletParams) {
+    return new EthWallet(self, walletParams);
+  };
+
+  var verifyEthAddress = function(params) {
+    params = params || {};
+    common.validateParams(params, ['address'], []);
+
+    var address = params.address;
+    return address.indexOf('0x') == 0 && address.length == 42;
+  };
+
+  return {
+    blockchain: ethBlockchain,
+    wallets: ethWallets,
+    newWalletObject: newEthWalletObject,
+    verifyAddress: verifyEthAddress
+  };
+};
+
 BitGo.prototype.getValidate = function() {
   return this._validate;
 };
@@ -260,7 +297,7 @@ BitGo.prototype.toJSON = function() {
   return {
     user: this._user,
     token: this._token,
-    extensionKey: this._extensionKey ?  this._extensionKey.toWIF() : null
+    extensionKey: this._extensionKey ? this._extensionKey.toWIF() : null
   };
 };
 
@@ -284,7 +321,7 @@ BitGo.prototype.verifyAddress = function(params) {
 
   try {
     address = bitcoin.address.fromBase58Check(params.address);
-  } catch(e) {
+  } catch (e) {
     return false;
   }
 
@@ -802,7 +839,7 @@ BitGo.prototype.getUser = function(params, callback) {
 // Get the current logged in user
 //
 BitGo.prototype.me = function(params, callback) {
-  return this.getUser({id: 'me'}, callback);
+  return this.getUser({ id: 'me' }, callback);
 };
 
 //
@@ -900,7 +937,7 @@ BitGo.prototype.getSharingKey = function(params, callback) {
 // ping
 // Test connectivity to the server
 //
-BitGo.prototype.ping = function(params,callback) {
+BitGo.prototype.ping = function(params, callback) {
   params = params || {};
   common.validateParams(params, [], [], callback);
 
@@ -918,17 +955,6 @@ BitGo.prototype.blockchain = function() {
     this._blockchain = new Blockchain(this);
   }
   return this._blockchain;
-};
-
-//
-// EthBlockchain
-// Get the Ethereum blockchain object.
-//
-BitGo.prototype.ethBlockchain = function() {
-  if (!this._ethBlockchain) {
-    this._ethBlockchain = new EthBlockchain(this);
-  }
-  return this._ethBlockchain;
 };
 
 //
@@ -954,17 +980,6 @@ BitGo.prototype.wallets = function() {
 };
 
 //
-// wallets
-// Get the user's wallets object.
-//
-BitGo.prototype.ethWallets = function() {
-  if (!this._ethWallets) {
-    this._ethWallets = new EthWallets(this);
-  }
-  return this._ethWallets;
-};
-
-//
 // travel rule
 // Get the travel rule object
 //
@@ -979,7 +994,7 @@ BitGo.prototype.travelRule = function() {
 // pendingApprovals
 // Get pending approvals that can be approved/ or rejected
 //
-BitGo.prototype.pendingApprovals = function( ) {
+BitGo.prototype.pendingApprovals = function() {
   if (!this._pendingApprovals) {
     this._pendingApprovals = new PendingApprovals(this);
   }
@@ -993,15 +1008,6 @@ BitGo.prototype.pendingApprovals = function( ) {
 //
 BitGo.prototype.newWalletObject = function(walletParams) {
   return new Wallet(this, walletParams);
-};
-
-//
-// newWalletObject
-// A factory method to create a new EthWallet object, initialized with the wallet params
-// Can be used to reconstitute a wallet from cached data
-//
-BitGo.prototype.newEthWalletObject = function(walletParams) {
-  return new EthWallet(this, walletParams);
 };
 
 BitGo.prototype.url = function(path) {
@@ -1137,7 +1143,7 @@ BitGo.prototype.getConstants = function(params) {
   };
 
   this.fetchConstants(params);
-  
+
   // use defaultConstants as the backup for keys that are not set in this._constants
   return _.merge({}, defaultConstants, this._constants);
 };

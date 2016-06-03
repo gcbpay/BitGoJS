@@ -96,7 +96,7 @@ Keychains.prototype.deriveLocal = function(params) {
 
   var derivedNode;
   try {
-    var derivedNode = bitcoin.hdPath(hdNode).derive(params.path);
+    derivedNode = bitcoin.hdPath(hdNode).derive(params.path);
   } catch (e) {
     throw apiResponse(400, {}, "Unable to derive HD key from path");
   }
@@ -171,9 +171,10 @@ Keychains.prototype.createBackup = function(params, callback) {
 //
 Keychains.prototype.get = function(params, callback) {
   params = params || {};
-  common.validateParams(params, ['xpub'], [], callback);
+  common.validateParams(params, [], ['xpub', 'ethAddress'], callback);
 
-  return this.bitgo.post(this.bitgo.url('/keychain/' + params.xpub))
+  var id = params.xpub || params.ethAddress;
+  return this.bitgo.post(this.bitgo.url('/keychain/' + encodeURIComponent(id)))
   .send({})
   .result()
   .nodeify(callback);

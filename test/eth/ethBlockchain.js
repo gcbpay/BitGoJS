@@ -27,7 +27,7 @@ describe('Ethereum Blockchain API:', function() {
 
     bitgo = new TestBitGo();
     bitgo.initializeTestVars();
-    blockchain = bitgo.ethBlockchain();
+    blockchain = bitgo.eth().blockchain();
     done();
   });
 
@@ -79,24 +79,6 @@ describe('Ethereum Blockchain API:', function() {
         assert(result.transactions.length > 20);
         assert.equal(result.transactions.length, result.count);
         assert(result.total > 75);
-        done();
-      });
-    });
-  });
-
-  describe('Get Address Unspents', function() {
-    it('arguments', function(done) {
-      assert.throws(function() { blockchain.getAddressUnspents('invalid', function() {}); });
-      assert.throws(function() { blockchain.getAddressUnspents({limit: 'a string!'}, function() {}); });
-      assert.throws(function() { blockchain.getAddressUnspents({}); });
-      done();
-    });
-
-    it('list', function(done) {
-      var options = { address: TEST_ADDRESS1, limit: 0.5 * 1e8 };
-      blockchain.getAddressUnspents(options, function(err, unspents) {
-        assert.equal(err, null);
-        assert.equal(Array.isArray(unspents), true);
         done();
       });
     });

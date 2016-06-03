@@ -51,33 +51,6 @@ EthBlockchain.prototype.getAddressTransactions = function(params, callback) {
 };
 
 //
-// Unspent Transactions
-// List the unspent outputs for a given address
-// Parameters include:
-//   address: the address to get unspent transactions
-//   limit: return enough unspents to accumulate to at least this amount (in satoshis).
-//
-EthBlockchain.prototype.getAddressUnspents = function(params, callback) {
-  params = params || {};
-  common.validateParams(params, ['address'], [], callback);
-
-  var url = this.bitgo.url("/eth/address/" + params.address + '/unspents');
-  if (params.limit) {
-    if (typeof(params.limit) != 'number') {
-      throw new Error('invalid limit - number expected');
-    }
-    url += '?limit=' + (params.limit * 1e8);
-  }
-
-  return this.bitgo.get(url)
-  .result()
-  .then(function(body) {
-    return body.unspents;
-  })
-  .nodeify(callback);
-};
-
-//
 // Get transaction
 // Fetch transaction details.
 //
