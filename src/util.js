@@ -3,6 +3,7 @@ var bitcoin = require('bitcoinjs-lib');
 var ethereumUtil = require('ethereumjs-util');
 var Big = require('big.js');
 var sha3 = require('keccakjs');
+var EthJSUtil = require("ethereumjs-util");
 
 Util.bnToByteArrayUnsigned = function(bn) {
   var ba = bn.abs().toByteArray();
@@ -53,4 +54,22 @@ Util.weiToEtherString = function(wei) {
   // 10^18
   var ether = big.div('1000000000000000000');
   return ether.toPrecision();
+};
+
+// Sign a message using Ethereum's ECsign method and return the signature string
+Util.ethSignMsgHash = function(msgHash, privKey) {
+  var signatureInParts = EthJSUtil.ecsign(new Buffer(EthJSUtil.stripHexPrefix(msgHash), 'hex'), new Buffer(privKey, 'hex'));
+
+  // Assemble strings from r, s and v
+  var v = signatureInParts.v;
+  var r = signatureInParts.r;
+  var s = signatureInParts.s;
+  r = EthJSUtil.fromSigned(r);
+  s = EthJSUtil.fromSigned(s);
+  r = EthJSUtil.toUnsigned(r).toString('hex');
+  s = EthJSUtil.toUnsigned(s).toString('hex');
+  v = EthJSUtil.stripHexPrefix(EthJSUtil.intToHex(v));
+
+  // Concatenate the r, s and v parts to make the signature string
+  return EthJSUtil.addHexPrefix(r.concat(s, v).toString("hex"));
 };

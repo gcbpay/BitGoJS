@@ -181,6 +181,9 @@ EthWallets.prototype.generateWallet = function(params, callback) {
   .then(function() {
     // the backup keychain may have only been created after the KRS call was completed
     if (backupKeychain) {
+      if (backupKeychain.xprv) {
+        backupKeychain.encryptedXprv = self.bitgo.encrypt({ password: params.passphrase, input: backupKeychain.xprv });
+      }
       backupAddress = Util.xpubToEthAddress(backupKeychain.xpub);
     }
   });
