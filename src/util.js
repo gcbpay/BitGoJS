@@ -42,12 +42,13 @@ Util.xprvToEthPrivateKey = function(xprv) {
 };
 
 Util.weiToEtherString = function(wei) {
+  var bn = wei;
   if (!(wei instanceof ethereumUtil.BN)) {
-    throw new Error('wei has to be an instance of BN');
+    bn = new ethereumUtil.BN(wei);
   }
   Big.E_POS = 256;
   Big.E_NEG = -18;
-  var weiString = wei.toString(10);
+  var weiString = bn.toString(10);
   var big = new Big(weiString);
   // 10^18
   var ether = big.div('1000000000000000000');
