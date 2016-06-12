@@ -6,7 +6,7 @@
 
 var assert = require('assert');
 var should = require('should');
-var Q = require('q');
+var ethereumUtil = require('ethereumjs-util');
 
 var BitGoJS = require('../../src/index');
 var common = require('../../src/common');
@@ -172,15 +172,17 @@ describe('Ethereum Wallets API:', function() {
               assert.equal(err, null);
               testWallet = wallet;
 
+              assert(wallet.balance() instanceof ethereumUtil.BN);
               assert.equal(wallet.balance(), 0);
+              assert.equal(Util.weiToEtherString(wallet.balance()), '0');
               assert.equal(wallet.label(), 'my wallet');
-              assert.equal(wallet.confirmedBalance(), 0);
-              assert.equal(wallet.keychains.length, 3);
-              assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[0].xpub }), true);
-              assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[1].xpub }), true);
-              assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[2].xpub }), true);
-              assert.equal(wallet.keychains[0].xpub, keychains[0].xpub);
-              assert.equal(wallet.keychains[1].xpub, keychains[1].xpub);
+              // assert.equal(wallet.confirmedBalance(), 0);
+              assert.equal(wallet.addresses.length, 3);
+              assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[0].address }), true);
+              assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[1].address }), true);
+              assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[2].address }), true);
+              assert.equal(wallet.addresses[0].address, keychains[0].ethAddress);
+              assert.equal(wallet.addresses[1].address, keychains[1].ethAddress);
               done();
             });
           });
@@ -213,20 +215,20 @@ describe('Ethereum Wallets API:', function() {
         var wallet = result.wallet;
 
         assert.equal(wallet.balance(), 0);
-        assert.equal(wallet.spendableBalance(), 0);
+        // assert.equal(wallet.spendableBalance(), 0);
         assert.equal(wallet.label(), TEST_WALLET_LABEL);
-        assert.equal(wallet.confirmedBalance(), 0);
-        assert.equal(wallet.keychains.length, 3);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[0].xpub }), true);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[1].xpub }), true);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[2].xpub }), true);
-        assert.equal(wallet.keychains[0].xpub, result.userKeychain.xpub);
-        assert.equal(wallet.keychains[1].xpub, result.backupKeychain.xpub);
+        // assert.equal(wallet.confirmedBalance(), 0);
+        assert.equal(wallet.addresses.length, 3);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[0].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[1].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[2].address }), true);
+        assert.equal(wallet.addresses[0].address, result.userKeychain.ethAddress);
+        assert.equal(wallet.addresses[1].address, result.backupKeychain.ethAddress);
 
         result.userKeychain.should.have.property('encryptedXprv');
         result.backupKeychain.should.not.have.property('encryptedXprv');
         result.backupKeychain.should.have.property('xprv');
-        result.warning.should.include('backup the backup keychain -- it is not stored anywhere else');
+        result.warning.should.include('back up the backup keychain -- it is not stored anywhere else');
 
         wallet.delete({}, function() {});
         done();
@@ -252,20 +254,18 @@ describe('Ethereum Wallets API:', function() {
 
         assert.equal(wallet.balance(), 0);
         assert.equal(wallet.label(), TEST_WALLET_LABEL);
-        assert.equal(wallet.confirmedBalance(), 0);
-        assert.equal(wallet.keychains.length, 3);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[0].xpub }), true);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[1].xpub }), true);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[2].xpub }), true);
-        assert.equal(wallet.keychains[0].xpub, result.userKeychain.xpub);
-        assert.equal(wallet.keychains[1].xpub, result.backupKeychain.xpub);
-
-        assert.equal(result.backupKeychain.xpub, coldBackupKey.xpub);
+        // assert.equal(wallet.confirmedBalance(), 0);
+        assert.equal(wallet.addresses.length, 3);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[0].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[1].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[2].address }), true);
+        assert.equal(wallet.addresses[0].address, result.userKeychain.ethAddress);
+        assert.equal(wallet.addresses[1].address, coldBackupKey.ethAddress);
 
         result.userKeychain.should.have.property('encryptedXprv');
-        result.backupKeychain.should.have.property('xpub');
-        result.backupKeychain.should.not.have.property('xprv');
-        result.backupKeychain.should.not.have.property('encryptedXprv');
+        // result.backupKeychain.should.have.property('xpub');
+        // result.backupKeychain.should.not.have.property('xprv');
+        // result.backupKeychain.should.not.have.property('encryptedXprv');
 
         wallet.delete({}, function() {});
         done();
@@ -287,21 +287,19 @@ describe('Ethereum Wallets API:', function() {
         var wallet = result.wallet;
 
         assert.equal(wallet.balance(), 0);
-        assert.equal(wallet.spendableBalance(), 0);
+        // assert.equal(wallet.spendableBalance(), 0);
         assert.equal(wallet.label(), TEST_WALLET_LABEL);
-        assert.equal(wallet.confirmedBalance(), 0);
-        assert.equal(wallet.keychains.length, 3);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[0].xpub }), true);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[1].xpub }), true);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[2].xpub }), true);
-        assert.equal(wallet.keychains[0].xpub, result.userKeychain.xpub);
-        assert.equal(wallet.keychains[1].xpub, result.backupKeychain.xpub);
+        // assert.equal(wallet.confirmedBalance(), 0);
+        assert.equal(wallet.addresses.length, 3);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[0].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[1].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[2].address }), true);
+        assert.equal(wallet.addresses[0].address, result.userKeychain.ethAddress);
+        assert.equal(wallet.addresses[1].address, result.backupKeychain.ethAddress);
 
         result.userKeychain.should.have.property('encryptedXprv');
         result.backupKeychain.should.not.have.property('encryptedXprv');
         result.should.not.have.property('warning');
-
-        result.wallet.canSendInstant().should.eql(true);
 
         wallet.delete({}, function() {});
         done();
@@ -335,14 +333,14 @@ describe('Ethereum Wallets API:', function() {
         assert.equal(wallet.id(), options.id);
         assert.equal(wallet.balance(), 0);
         assert.equal(wallet.label(), 'my wallet');
-        assert.equal(wallet.confirmedBalance(), 0);
-        assert.equal(wallet.unconfirmedReceives(), 0);
-        assert.equal(wallet.unconfirmedSends(), 0);
-        assert.equal(wallet.approvalsRequired(), 1);
-        assert.equal(wallet.keychains.length, 3);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[0] }), true);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[1] }), true);
-        assert.equal(bitgo.keychains().isValid({ key: wallet.keychains[2] }), true);
+        // assert.equal(wallet.confirmedBalance(), 0);
+        // assert.equal(wallet.unconfirmedReceives(), 0);
+        // assert.equal(wallet.unconfirmedSends(), 0);
+        // assert.equal(wallet.approvalsRequired(), 1);
+        assert.equal(wallet.addresses.length, 3);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[0].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[1].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[2].address }), true);
         done();
       });
     });

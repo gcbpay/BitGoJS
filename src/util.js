@@ -1,5 +1,7 @@
 var Util = module.exports;
 var bitcoin = require('bitcoinjs-lib');
+var ethereumUtil = require('ethereumjs-util');
+var Big = require('big.js');
 var sha3 = require('keccakjs');
 
 Util.bnToByteArrayUnsigned = function(bn) {
@@ -37,4 +39,17 @@ Util.xprvToEthPrivateKey = function(xprv) {
   var hdNode = bitcoin.HDNode.fromBase58(xprv);
   var ethPrivateKey = hdNode.keyPair.d.toBuffer();
   return ethPrivateKey.toString('hex');
+};
+
+Util.weiToEtherString = function(wei) {
+  if (!(wei instanceof ethereumUtil.BN)) {
+    throw new Error('wei has to be an instance of BN');
+  }
+  Big.E_POS = 256;
+  Big.E_NEG = -18;
+  var weiString = wei.toString(10);
+  var big = new Big(weiString);
+  // 10^18
+  var ether = big.div('1000000000000000000');
+  return ether.toPrecision();
 };

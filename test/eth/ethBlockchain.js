@@ -33,17 +33,23 @@ describe('Ethereum Blockchain API:', function() {
 
   describe('Get Address', function() {
     it('arguments', function(done) {
-      assert.throws(function() { blockchain.getAddress('invalid', function() {}); });
-      assert.throws(function() { blockchain.getAddress({}); });
+      assert.throws(function() {
+        blockchain.getAddress('invalid', function() {
+        });
+      });
+      assert.throws(function() {
+        blockchain.getAddress({});
+      });
       done();
     });
 
     it('get', function(done) {
-      blockchain.getAddress({address: TEST_ADDRESS1}, function(err, address) {
+      blockchain.getAddress({ address: TEST_ADDRESS1 }, function(err, address) {
         assert.equal(err, null);
         address.should.have.property('address');
         address.should.have.property('balance');
-
+        address.should.have.property('sent');
+        address.should.have.property('received');
         done();
       });
     });
@@ -51,8 +57,13 @@ describe('Ethereum Blockchain API:', function() {
 
   describe('Get Address Transactions', function() {
     it('arguments', function(done) {
-      assert.throws(function() { blockchain.getAddressTransactions('invalid', function() {}); });
-      assert.throws(function() { blockchain.getAddressTransactions({}); });
+      assert.throws(function() {
+        blockchain.getAddressTransactions('invalid', function() {
+        });
+      });
+      assert.throws(function() {
+        blockchain.getAddressTransactions({});
+      });
       done();
     });
 
@@ -62,7 +73,7 @@ describe('Ethereum Blockchain API:', function() {
         assert.equal(err, null);
         assert.equal(Array.isArray(result.transactions), true);
         assert.equal(result.start, 0);
-        result.should.have.property('total');
+        // result.should.have.property('total');
         result.should.have.property('count');
         done();
       });
@@ -74,11 +85,11 @@ describe('Ethereum Blockchain API:', function() {
         assert.equal(err, null);
         assert.equal(Array.isArray(result.transactions), true);
         assert.equal(result.start, 0);
-        result.should.have.property('total');
+        // result.should.have.property('total');
         result.should.have.property('count');
-        assert(result.transactions.length > 20);
+        assert(result.transactions.length > 3);
         assert.equal(result.transactions.length, result.count);
-        assert(result.total > 75);
+        // assert(result.total > 75);
         done();
       });
     });
@@ -86,24 +97,35 @@ describe('Ethereum Blockchain API:', function() {
 
   describe('Get Transaction', function() {
     it('arguments', function(done) {
-      assert.throws(function() { blockchain.getTransaction('invalid', function() {}); });
-      assert.throws(function() { blockchain.getTransaction({}); });
-      assert.throws(function() { blockchain.getTransaction({}, function() {}); });
+      assert.throws(function() {
+        blockchain.getTransaction('invalid', function() {
+        });
+      });
+      assert.throws(function() {
+        blockchain.getTransaction({});
+      });
+      assert.throws(function() {
+        blockchain.getTransaction({}, function() {
+        });
+      });
       done();
     });
 
     it('get', function(done) {
-      blockchain.getTransaction({id: TEST_TRANSACTION}, function(err, transaction) {
+      blockchain.getTransaction({ id: TEST_TRANSACTION }, function(err, transaction) {
         assert.equal(err, null);
-        transaction.should.have.property('id');
-        transaction.should.have.property('date');
-        transaction.should.have.property('entries');
-        assert.equal(Array.isArray(transaction.entries), true);
-        assert.equal(transaction.entries.length, 3);
-        var transactionEntry = transaction.entries[0];
-        transactionEntry.should.have.property('account');
-        transactionEntry.should.have.property('value');
-
+        transaction.transaction.should.have.property('txHash');
+        transaction.transaction.should.have.property('receiveTime');
+        transaction.transaction.should.have.property('confirmTime');
+        transaction.transaction.should.have.property('entries');
+        transaction.transaction.should.have.property('from');
+        transaction.transaction.should.have.property('to');
+        // for the time being, transaction entries are not necessary for the client
+        // assert.equal(Array.isArray(transaction.entries), true);
+        // assert.equal(transaction.entries.length, 2);
+        // var transactionEntry = transaction.entries[0];
+        // transactionEntry.should.have.property('account');
+        // transactionEntry.should.have.property('value');
         done();
       });
     });
@@ -111,22 +133,30 @@ describe('Ethereum Blockchain API:', function() {
 
   describe('Get Block', function() {
     it('arguments', function(done) {
-      assert.throws(function() { blockchain.getBlock('invalid', function() {}); });
-      assert.throws(function() { blockchain.getBlock({}); });
-      assert.throws(function() { blockchain.getBlock({}, function() {}); });
+      assert.throws(function() {
+        blockchain.getBlock('invalid', function() {
+        });
+      });
+      assert.throws(function() {
+        blockchain.getBlock({});
+      });
+      assert.throws(function() {
+        blockchain.getBlock({}, function() {
+        });
+      });
       done();
     });
 
     it('get', function(done) {
-      blockchain.getBlock({id: TEST_BLOCK}, function(err, block) {
+      blockchain.getBlock({ id: TEST_BLOCK }, function(err, block) {
         assert.equal(err, null);
         block.should.have.property('height');
-        block.should.have.property('date');
-        block.should.have.property('previous');
+        block.should.have.property('createTime');
+        block.should.have.property('parentHash');
         block.should.have.property('transactions');
-        block.height.should.eql(326945);
-        block.previous.should.eql('00000000eecd159babde9b094c6dbf1f4f63028ba100f6f092cacb65f04afc46');
-        block.transactions.should.include('e393422e5a0b4c011f511cf3c5911e9c09defdcadbcf16ceb12a47a80e257aaa');
+        block.height.should.equal(46239);
+        block.parentHash.should.equal('0x43df14fa812e4862a13db5330a838b0b112bbbb1c293ff1ce97d13fd6626b389');
+        block.transactions.should.include('0xc0c1c720bc5b3583ad3a4075730b44c0c120a0fe660e51817f8c857bf37dbec0');
         done();
       });
     });

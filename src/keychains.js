@@ -9,6 +9,7 @@ var crypto = require('crypto');
 var common = require('./common');
 var Util = require('./util');
 var bitcoin = require('./bitcoin');
+var ethereumUtil = require('ethereumjs-util');
 
 //
 // Constructor
@@ -24,6 +25,13 @@ var Keychains = function(bitgo) {
 Keychains.prototype.isValid = function(params) {
   params = params || {};
   common.validateParams(params, [], []);
+
+  if (params.ethAddress) {
+    if (typeof(params.ethAddress) != 'string') {
+      throw new Error('ethAddress must be a string');
+    }
+    return ethereumUtil.isValidAddress(params.ethAddress);
+  }
 
   if (typeof(params.key) != 'string' && typeof(params.key) != 'object') {
     throw new Error('key must be a string or object');

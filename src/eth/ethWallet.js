@@ -7,6 +7,7 @@
 
 var TransactionBuilder = require('../transactionBuilder');
 var bitcoin = require('../bitcoin');
+var ethereumUtil = require('ethereumjs-util');
 var Keychains = require('../keychains');
 var PendingApproval = require('../pendingapproval');
 var Util = require('../util');
@@ -55,7 +56,7 @@ EthWallet.prototype.label = function() {
 // Get the balance of this wallet.
 //
 EthWallet.prototype.balance = function() {
-  return this.wallet.balance;
+  return new ethereumUtil.BN(this.wallet.balance);
 };
 
 //
@@ -64,7 +65,7 @@ EthWallet.prototype.balance = function() {
 // This is the total of all funds available for s(p)ending
 //
 EthWallet.prototype.spendableBalance = function() {
-  return this.wallet.spendableBalance;
+  return new ethereumUtil.BN(this.wallet.spendableBalance);
 };
 
 //
