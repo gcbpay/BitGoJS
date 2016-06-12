@@ -12,7 +12,7 @@ var TestBitGo = require('../lib/test_bitgo');
 var BN = require('ethereumjs-util').BN;
 
 // TODO: WORK IN PROGRESS
-describe('Ethereum BitGo.eth():', function() {
+describe('Ethereum BitGo.eth:', function() {
   var bitgo;
 
   before(function() {
@@ -39,6 +39,10 @@ describe('Ethereum BitGo.eth():', function() {
       // 1234.505 ether
       number = new BN('1234505000000000000000');
       bitgo.eth().weiToEtherString(number).should.equal('1234.505');
+      assert.throws(function() {
+        // this number should overflow
+        bitgo.eth().weiToEtherString(1234505000000000000000).should.equal('1234.505');
+      });
 
       // 123450 ether
       number = new BN('123450000000000000000000');
