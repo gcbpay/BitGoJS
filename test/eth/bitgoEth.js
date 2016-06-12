@@ -12,7 +12,7 @@ var TestBitGo = require('../lib/test_bitgo');
 var BN = require('ethereumjs-util').BN;
 
 // TODO: WORK IN PROGRESS
-describe('Ethereum Util:', function() {
+describe('Ethereum BitGo.eth():', function() {
   var bitgo;
 
   before(function() {
