@@ -257,7 +257,8 @@ BitGo.prototype.eth = function() {
     blockchain: ethBlockchain,
     wallets: ethWallets,
     newWalletObject: newEthWalletObject,
-    verifyAddress: verifyEthAddress
+    verifyAddress: verifyEthAddress,
+    weiToEtherString: Util.weiToEtherString
   };
 };
 
