@@ -22,17 +22,16 @@ describe('Ethereum Blockchain API:', function() {
   var bitgo;
   var blockchain;
 
-  before(function(done) {
+  before(function() {
     BitGoJS.setNetwork('testnet');
 
     bitgo = new TestBitGo();
     bitgo.initializeTestVars();
     blockchain = bitgo.eth().blockchain();
-    done();
   });
 
   describe('Get Address', function() {
-    it('arguments', function(done) {
+    it('arguments', function() {
       assert.throws(function() {
         blockchain.getAddress('invalid', function() {
         });
@@ -40,23 +39,21 @@ describe('Ethereum Blockchain API:', function() {
       assert.throws(function() {
         blockchain.getAddress({});
       });
-      done();
     });
 
-    it('get', function(done) {
-      blockchain.getAddress({ address: TEST_ADDRESS1 }, function(err, address) {
-        assert.equal(err, null);
+    it('get', function() {
+      return blockchain.getAddress({ address: TEST_ADDRESS1 })
+      .then(function(address) {
         address.should.have.property('address');
         address.should.have.property('balance');
         address.should.have.property('sent');
         address.should.have.property('received');
-        done();
       });
     });
   });
 
   describe('Get Address Transactions', function() {
-    it('arguments', function(done) {
+    it('arguments', function() {
       assert.throws(function() {
         blockchain.getAddressTransactions('invalid', function() {
         });
@@ -64,25 +61,23 @@ describe('Ethereum Blockchain API:', function() {
       assert.throws(function() {
         blockchain.getAddressTransactions({});
       });
-      done();
     });
 
-    it('list', function(done) {
+    it('list', function() {
       var options = { address: TEST_ADDRESS1 };
-      blockchain.getAddressTransactions(options, function(err, result) {
-        assert.equal(err, null);
+      return blockchain.getAddressTransactions(options)
+      .then(function(result) {
         assert.equal(Array.isArray(result.transactions), true);
         assert.equal(result.start, 0);
         // result.should.have.property('total');
         result.should.have.property('count');
-        done();
       });
     });
 
-    it('list_many_transactions', function(done) {
+    it('list_many_transactions', function() {
       var options = { address: TEST_MANYTRANSACTIONSADDRESS };
-      blockchain.getAddressTransactions(options, function(err, result) {
-        assert.equal(err, null);
+      blockchain.getAddressTransactions(options)
+      .then(function(result) {
         assert.equal(Array.isArray(result.transactions), true);
         assert.equal(result.start, 0);
         // result.should.have.property('total');
@@ -90,13 +85,12 @@ describe('Ethereum Blockchain API:', function() {
         assert(result.transactions.length > 3);
         assert.equal(result.transactions.length, result.count);
         // assert(result.total > 75);
-        done();
       });
     });
   });
 
   describe('Get Transaction', function() {
-    it('arguments', function(done) {
+    it('arguments', function() {
       assert.throws(function() {
         blockchain.getTransaction('invalid', function() {
         });
@@ -108,12 +102,11 @@ describe('Ethereum Blockchain API:', function() {
         blockchain.getTransaction({}, function() {
         });
       });
-      done();
     });
 
-    it('get', function(done) {
-      blockchain.getTransaction({ id: TEST_TRANSACTION }, function(err, transaction) {
-        assert.equal(err, null);
+    it('get', function() {
+      return blockchain.getTransaction({ id: TEST_TRANSACTION })
+      .then(function(transaction) {
         transaction.transaction.should.have.property('txHash');
         transaction.transaction.should.have.property('receiveTime');
         transaction.transaction.should.have.property('confirmTime');
@@ -126,13 +119,12 @@ describe('Ethereum Blockchain API:', function() {
         // var transactionEntry = transaction.entries[0];
         // transactionEntry.should.have.property('account');
         // transactionEntry.should.have.property('value');
-        done();
       });
     });
   });
 
   describe('Get Block', function() {
-    it('arguments', function(done) {
+    it('arguments', function() {
       assert.throws(function() {
         blockchain.getBlock('invalid', function() {
         });
@@ -144,12 +136,11 @@ describe('Ethereum Blockchain API:', function() {
         blockchain.getBlock({}, function() {
         });
       });
-      done();
     });
 
-    it('get', function(done) {
-      blockchain.getBlock({ id: TEST_BLOCK }, function(err, block) {
-        assert.equal(err, null);
+    it('get', function() {
+      return blockchain.getBlock({ id: TEST_BLOCK })
+      .then(function(block) {
         block.should.have.property('height');
         block.should.have.property('createTime');
         block.should.have.property('parentHash');
@@ -157,7 +148,6 @@ describe('Ethereum Blockchain API:', function() {
         block.height.should.equal(46239);
         block.parentHash.should.equal('0x43df14fa812e4862a13db5330a838b0b112bbbb1c293ff1ce97d13fd6626b389');
         block.transactions.should.include('0xc0c1c720bc5b3583ad3a4075730b44c0c120a0fe660e51817f8c857bf37dbec0');
-        done();
       });
     });
   });

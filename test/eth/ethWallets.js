@@ -42,9 +42,9 @@ describe('Ethereum Wallets API:', function() {
       assert.throws(function() { wallets.list('invalid'); });
     });
 
-    it('all', function(done) {
-      wallets.list({}, function(err, result) {
-        assert.equal(err, null);
+    it('all', function() {
+      return wallets.list({})
+      .then(function(result) {
         result.should.have.property('wallets');
         result.should.have.property('start');
         result.should.have.property('limit');
@@ -54,7 +54,6 @@ describe('Ethereum Wallets API:', function() {
         result.limit.should.not.equal(0);
         result.total.should.not.equal(0);
         result.wallets.length.should.not.equal(0);
-        done();
       });
     });
 
@@ -77,10 +76,9 @@ describe('Ethereum Wallets API:', function() {
       });
     });
 
-    it('limit', function(done) {
-      wallets.list({ limit: 2 }, function(err, result) {
-        assert.equal(err, null);
-
+    it('limit', function() {
+      return wallets.list({ limit: 2 })
+      .then(function(result) {
         result.should.have.property('wallets');
         result.should.have.property('start');
         result.should.have.property('limit');
@@ -90,13 +88,12 @@ describe('Ethereum Wallets API:', function() {
         result.limit.should.equal(2);
         result.total.should.not.equal(0);
         result.wallets.length.should.equal(2);
-        done();
       });
     });
 
-    it('skip', function(done) {
-      wallets.list({ limit: 1, skip: 2 }, function(err, result) {
-        assert.equal(err, null);
+    it('skip', function() {
+      return wallets.list({ limit: 1, skip: 2 })
+      .then(function(result) {
 
         result.should.have.property('wallets');
         result.should.have.property('start');
@@ -107,14 +104,12 @@ describe('Ethereum Wallets API:', function() {
         result.limit.should.equal(1);
         result.total.should.not.equal(0);
         result.wallets.length.should.equal(1);
-        done();
       });
     });
 
-    it('limit and skip', function(done) {
-      wallets.list({ limit: 1, skip: 5 }, function(err, result) {
-        assert.equal(err, null);
-
+    it('limit and skip', function() {
+      return wallets.list({ limit: 1, skip: 5 })
+      .then(function(result) {
         result.should.have.property('wallets');
         result.should.have.property('start');
         result.should.have.property('limit');
@@ -124,7 +119,6 @@ describe('Ethereum Wallets API:', function() {
         result.limit.should.equal(1);
         result.total.should.not.equal(0);
         result.wallets.length.should.equal(1);
-        done();
       });
     });
   });
@@ -141,52 +135,54 @@ describe('Ethereum Wallets API:', function() {
       assert.throws(function() { wallets.add({}, 0); });
     });
 
-    it('wallet', function(done) {
+    it('wallet', function() {
       var options = {
         xpub: keychains[0].xpub,
         encryptedXprv: keychains[0].xprv
       };
-      bitgo.keychains().add(options, function(err, keychain) {
-        assert.equal(err, null);
+      return bitgo.keychains().add(options)
+      .then(function(keychain) {
         assert.equal(keychain.xpub, keychains[0].xpub);
         assert.equal(keychain.encryptedXprv, keychains[0].xprv);
 
         var options = {
           xpub: keychains[1].xpub
         };
-        bitgo.keychains().add(options, function(err, keychain) {
-          assert.equal(err, null);
-          assert.equal(keychain.xpub, keychains[1].xpub);
+        return bitgo.keychains().add(options);
+      })
+      .then(function(keychain) {
+        assert.equal(keychain.xpub, keychains[1].xpub);
 
-          bitgo.keychains().createBitGo({ type: 'eth' }, function(err, keychain) {
-            assert(keychain.ethAddress);
-            keychains.push(keychain);
+        return bitgo.keychains().createBitGo({ type: 'eth' });
+      })
+      .then(function(keychain) {
+        assert(keychain.ethAddress);
+        keychains.push(keychain);
 
-            var options = {
-              label: 'my wallet',
-              m: 2,
-              n: 3,
-              addresses: keychains.map(function(k) { return k.ethAddress; })
-            };
-            wallets.add(options, function(err, wallet) {
-              assert.equal(err, null);
-              testWallet = wallet;
+        var options = {
+          label: 'my wallet',
+          m: 2,
+          n: 3,
+          addresses: keychains.map(function(k) {
+            return k.ethAddress;
+          })
+        };
+        return wallets.add(options);
+      })
+      .then(function(wallet) {
+        testWallet = wallet;
 
-              assert(wallet.balance() instanceof ethereumUtil.BN);
-              assert.equal(wallet.balance(), 0);
-              assert.equal(Util.weiToEtherString(wallet.balance()), '0');
-              assert.equal(wallet.label(), 'my wallet');
-              // assert.equal(wallet.confirmedBalance(), 0);
-              assert.equal(wallet.addresses.length, 3);
-              assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[0].address }), true);
-              assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[1].address }), true);
-              assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[2].address }), true);
-              assert.equal(wallet.addresses[0].address, keychains[0].ethAddress);
-              assert.equal(wallet.addresses[1].address, keychains[1].ethAddress);
-              done();
-            });
-          });
-        });
+        assert(wallet.balance() instanceof ethereumUtil.BN);
+        assert.equal(wallet.balance(), 0);
+        assert.equal(Util.weiToEtherString(wallet.balance()), '0');
+        assert.equal(wallet.label(), 'my wallet');
+        // assert.equal(wallet.confirmedBalance(), 0);
+        assert.equal(wallet.addresses.length, 3);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[0].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[1].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[2].address }), true);
+        assert.equal(wallet.addresses[0].address, keychains[0].ethAddress);
+        assert.equal(wallet.addresses[1].address, keychains[1].ethAddress);
       });
     });
   });
@@ -201,14 +197,14 @@ describe('Ethereum Wallets API:', function() {
       assert.throws(function() { wallets.generateWallet(); });
     });
 
-    it('default create', function(done) {
+    it('default create', function() {
       var options = {
         "passphrase": TestBitGo.TEST_WALLET1_PASSCODE,
         "label": TEST_WALLET_LABEL
       };
 
-      bitgo.eth().wallets().generateWallet(options, function(err, result) {
-        assert.equal(err, null);
+      return bitgo.eth().wallets().generateWallet(options)
+      .then(function(result) {
         assert.notEqual(result, null);
 
         result.should.have.property('wallet');
@@ -230,12 +226,11 @@ describe('Ethereum Wallets API:', function() {
         result.backupKeychain.should.have.property('xprv');
         result.warning.should.include('back up the backup keychain -- it is not stored anywhere else');
 
-        wallet.delete({}, function() {});
-        done();
+        return wallet.delete({});
       });
     });
 
-    it('create with cold backup eth address', function(done) {
+    it('create with cold backup eth address', function() {
 
       // Simulate a cold backup key
       var coldBackupKey = bitgo.keychains().create();
@@ -245,8 +240,8 @@ describe('Ethereum Wallets API:', function() {
         "backupAddress": Util.xpubToEthAddress(coldBackupKey.xpub)
       };
 
-      bitgo.eth().wallets().generateWallet(options, function(err, result) {
-        assert.equal(err, null);
+      return bitgo.eth().wallets().generateWallet(options)
+      .then(function(result) {
         assert.notEqual(result, null);
 
         result.should.have.property('wallet');
@@ -267,20 +262,19 @@ describe('Ethereum Wallets API:', function() {
         // result.backupKeychain.should.not.have.property('xprv');
         // result.backupKeychain.should.not.have.property('encryptedXprv');
 
-        wallet.delete({}, function() {});
-        done();
+        return wallet.delete({});
       });
     });
 
-    it('create with backup xpub provider (KRS wallet)', function(done) {
+    it('create with backup xpub provider (KRS wallet)', function() {
       var options = {
         "passphrase": TestBitGo.TEST_WALLET1_PASSCODE,
         "label": TEST_WALLET_LABEL,
         "backupXpubProvider": "keyvault-io"
       };
 
-      bitgo.eth().wallets().generateWallet(options, function(err, result) {
-        assert.equal(err, null);
+      return bitgo.eth().wallets().generateWallet(options)
+      .then(function(result) {
         assert.notEqual(result, null);
 
         result.should.have.property('wallet');
@@ -301,8 +295,7 @@ describe('Ethereum Wallets API:', function() {
         result.backupKeychain.should.not.have.property('encryptedXprv');
         result.should.not.have.property('warning');
 
-        wallet.delete({}, function() {});
-        done();
+        return wallet.delete({});
       });
     });
   });
@@ -316,20 +309,22 @@ describe('Ethereum Wallets API:', function() {
 
     it('non existent wallet', function(done) {
       var options = {
-        id: '0xUnsupportedWalletId'
+        id: '0xaaaaaaaaaaaaaaa0123456789abcdef72e63b508'
       };
-      wallets.get(options, function(err, wallet) {
-        assert(!wallet);
+      return wallets.get(options)
+      .catch(function(error) {
+        error.message.should.equal('not found');
+        error.status.should.equal(404);
         done();
-      });
+      })
     });
 
-    it('get', function(done) {
+    it('get', function() {
       var options = {
         id: testWallet.id()
       };
-      wallets.get(options, function(err, wallet) {
-        assert.equal(err, null);
+      return wallets.get(options)
+      .then(function(wallet) {
         assert.equal(wallet.id(), options.id);
         assert.equal(wallet.balance(), 0);
         assert.equal(wallet.label(), 'my wallet');
@@ -341,7 +336,6 @@ describe('Ethereum Wallets API:', function() {
         assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[0].address }), true);
         assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[1].address }), true);
         assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[2].address }), true);
-        done();
       });
     });
   });

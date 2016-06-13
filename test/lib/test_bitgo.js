@@ -105,6 +105,9 @@ BitGo.prototype.initializeTestVars = function() {
   BitGo.TEST_ETH_WALLET3_ADDRESS2 = '0x04d453650ab2cb926cf44f938c31a51bac39ec7f';
   BitGo.TEST_ETH_WALLET3_ADDRESS3 = '0x6b5f14c498e45f37f7e277a3f4bc031b01d97778';
 
+  // TEST_WALLET_4 is a safe wallet
+  BitGo.TEST_ETH_WALLET4_ADDRESS = '0xe59dfe5c67114b39a5662cc856be536c614124c0';
+
 };
 
 //
