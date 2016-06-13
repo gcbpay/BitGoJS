@@ -39,9 +39,23 @@ Util.xpubToEthAddress = function(xpub) {
 Util.xprvToEthPrivateKey = function(xprv) {
   var hdNode = bitcoin.HDNode.fromBase58(xprv);
   var ethPrivateKey = hdNode.keyPair.d.toBuffer();
-  return ethPrivateKey.toString('hex');
+  return EthJSUtil.setLengthLeft(ethPrivateKey, 32).toString('hex');
 };
 
+// Sign a message using Ethereum's ECsign method and return the signature string
+Util.ethSignMsgHash = function(msgHash, privKey) {
+  var signatureInParts = EthJSUtil.ecsign(new Buffer(EthJSUtil.stripHexPrefix(msgHash), 'hex'), new Buffer(privKey, 'hex'));
+
+  // Assemble strings from r, s and v
+  var r = EthJSUtil.setLengthLeft(signatureInParts.r, 32).toString('hex');
+  var s = EthJSUtil.setLengthLeft(signatureInParts.s, 32).toString('hex');
+  var v = EthJSUtil.stripHexPrefix(EthJSUtil.intToHex(signatureInParts.v));
+
+  // Concatenate the r, s and v parts to make the signature string
+  return EthJSUtil.addHexPrefix(r.concat(s, v));
+};
+
+// Convert from wei string (or BN) to Ether (multiply by 1e18)
 Util.weiToEtherString = function(wei) {
   var bn = wei;
   if (!(wei instanceof ethereumUtil.BN)) {
@@ -54,22 +68,4 @@ Util.weiToEtherString = function(wei) {
   // 10^18
   var ether = big.div('1000000000000000000');
   return ether.toPrecision();
-};
-
-// Sign a message using Ethereum's ECsign method and return the signature string
-Util.ethSignMsgHash = function(msgHash, privKey) {
-  var signatureInParts = EthJSUtil.ecsign(new Buffer(EthJSUtil.stripHexPrefix(msgHash), 'hex'), new Buffer(privKey, 'hex'));
-
-  // Assemble strings from r, s and v
-  var v = signatureInParts.v;
-  var r = signatureInParts.r;
-  var s = signatureInParts.s;
-  r = EthJSUtil.fromSigned(r);
-  s = EthJSUtil.fromSigned(s);
-  r = EthJSUtil.toUnsigned(r).toString('hex');
-  s = EthJSUtil.toUnsigned(s).toString('hex');
-  v = EthJSUtil.stripHexPrefix(EthJSUtil.intToHex(v));
-
-  // Concatenate the r, s and v parts to make the signature string
-  return EthJSUtil.addHexPrefix(r.concat(s, v).toString("hex"));
 };
