@@ -30,9 +30,7 @@ Util.p2shMultisigOutputScript = function(m, pubKeys) {
 Util.xpubToEthAddress = function(xpub) {
   var hdNode = bitcoin.HDNode.fromBase58(xpub);
   var ethPublicKey = hdNode.keyPair.__Q.getEncoded(false).slice(1);
-  var hash = new sha3(256);
-  hash.update(ethPublicKey);
-  return '0x' + hash.digest('hex').slice(-40);
+  return '0x' + ethereumUtil.publicToAddress(ethPublicKey, false).toString('hex');
 };
 
 // Convert a BTC xpriv to an Ethereum private key (without 0x prefix)
