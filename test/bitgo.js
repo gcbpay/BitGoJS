@@ -507,8 +507,7 @@ describe('BitGo', function() {
         })
         .catch(function(error) {
           error.message.should.include('not found');
-        })
-        .done();
+        });
       });
 
       it('get', function() {
@@ -536,14 +535,15 @@ describe('BitGo', function() {
         });
       });
       it('detect a bad gaurantee', function() {
+        var originalStackError = new Error();
         return bitgo.instantGuarantee({ id: '5656359623ab7f3a28d64266ba8c11db' })
         .then(function() {
           throw new Error('should not be here!!');
         })
         .catch(function(error) {
+          console.trace(originalStackError);
           error.message.should.include('Invalid signature');
-        })
-        .done();
+        });
       });
     });
 
@@ -583,7 +583,7 @@ describe('BitGo', function() {
         result.xpub.should.equal(TestBitGo.TEST_USER_ECDH_XPUB);
         done();
       })
-      .done();
+      .finally(done);
     });
   });
 

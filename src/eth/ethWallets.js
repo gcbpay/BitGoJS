@@ -255,6 +255,10 @@ EthWallets.prototype.add = function(params, callback) {
   .send(walletParams)
   .result()
   .then(function(body) {
+    var serverAddresses = _.map(body.private.addresses, 'address');
+    if (!_.isEqual(walletParams.addresses, serverAddresses)) {
+      throw new Error('server addresses do not match');
+    }
     return new EthWallet(self.bitgo, body);
   })
   .nodeify(callback);

@@ -109,10 +109,12 @@ Keychains.prototype.deriveLocal = function(params) {
     throw apiResponse(400, {}, "Unable to derive HD key from path");
   }
 
+  var xpub = derivedNode.neutered().toBase58();
   return {
     path: params.path,
-    xpub: derivedNode.neutered().toBase58(),
-    xprv: params.xprv && derivedNode.toBase58()
+    xpub: xpub,
+    xprv: params.xprv && derivedNode.toBase58(),
+    ethAddress: Util.xpubToEthAddress(xpub)
   }
 };
 
@@ -126,6 +128,14 @@ Keychains.prototype.list = function(params, callback) {
 
   return this.bitgo.get(this.bitgo.url('/keychain'))
   .result('keychains')
+  .then(function(keychains){
+    keychains.map(function(keychain) {
+      if (keychain.ethAddress !== Util.xpubToEthAddress(keychain.xpub)) {
+        throw new Error('ethAddress and xpub do not match');
+      }
+    });
+    return keychains;
+  })
   .nodeify(callback);
 };
 
@@ -140,6 +150,12 @@ Keychains.prototype.add = function(params, callback) {
   return this.bitgo.post(this.bitgo.url('/keychain'))
   .send(params)
   .result()
+  .then(function(keychain){
+    if (keychain.ethAddress !== Util.xpubToEthAddress(keychain.xpub)) {
+      throw new Error('ethAddress and xpub do not match');
+    }
+    return keychain;
+  })
   .nodeify(callback);
 };
 
@@ -154,6 +170,12 @@ Keychains.prototype.createBitGo = function(params, callback) {
   return this.bitgo.post(this.bitgo.url('/keychain/bitgo'))
   .send(params)
   .result()
+  .then(function(keychain){
+    if (keychain.ethAddress !== Util.xpubToEthAddress(keychain.xpub)) {
+      throw new Error('ethAddress and xpub do not match');
+    }
+    return keychain;
+  })
   .nodeify(callback);
 };
 
@@ -168,6 +190,12 @@ Keychains.prototype.createBackup = function(params, callback) {
   return this.bitgo.post(this.bitgo.url('/keychain/backup'))
   .send(params)
   .result()
+  .then(function(keychain){
+    if (keychain.ethAddress !== Util.xpubToEthAddress(keychain.xpub)) {
+      throw new Error('ethAddress and xpub do not match');
+    }
+    return keychain;
+  })
   .nodeify(callback);
 };
 
@@ -181,10 +209,20 @@ Keychains.prototype.get = function(params, callback) {
   params = params || {};
   common.validateParams(params, [], ['xpub', 'ethAddress'], callback);
 
+  if (!params.xpub && !params.ethAddress) {
+    throw new Error('xpub or ethAddress must be defined');
+  }
+
   var id = params.xpub || params.ethAddress;
   return this.bitgo.post(this.bitgo.url('/keychain/' + encodeURIComponent(id)))
   .send({})
   .result()
+  .then(function(keychain){
+    if (keychain.ethAddress !== Util.xpubToEthAddress(keychain.xpub)) {
+      throw new Error('ethAddress and xpub do not match');
+    }
+    return keychain;
+  })
   .nodeify(callback);
 };
 
@@ -203,6 +241,12 @@ Keychains.prototype.update = function(params, callback) {
     encryptedXprv: params.encryptedXprv
   })
   .result()
+  .then(function(keychain){
+    if (keychain.ethAddress !== Util.xpubToEthAddress(keychain.xpub)) {
+      throw new Error('ethAddress and xpub do not match');
+    }
+    return keychain;
+  })
   .nodeify(callback);
 };
 

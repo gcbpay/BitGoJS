@@ -493,7 +493,7 @@ EthWallet.prototype.getAndPrepareSigningKeychain = function(params, callback) {
     throw new Error('xprv provided was not a private key (found xpub instead)');
   }
 
-  var walletAddresses = _.pluck(self.addresses, 'address');
+  var walletAddresses = _.map(self.addresses, 'address');
   if (!_.includes(walletAddresses, Util.xpubToEthAddress(xpub))) {
     throw new Error('xprv provided did not correspond to any address on this wallet!');
   }

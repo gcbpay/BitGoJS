@@ -222,8 +222,8 @@ describe('Ethereum Wallets API:', function() {
         assert.equal(wallet.addresses[1].address, result.backupKeychain.ethAddress);
 
         result.userKeychain.should.have.property('encryptedXprv');
-        result.backupKeychain.should.not.have.property('encryptedXprv');
         result.backupKeychain.should.have.property('xprv');
+        result.backupKeychain.should.have.property('encryptedXprv');
         result.warning.should.include('back up the backup keychain -- it is not stored anywhere else');
 
         return wallet.delete({});
