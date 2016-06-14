@@ -1,9 +1,8 @@
 var Util = module.exports;
 var bitcoin = require('bitcoinjs-lib');
-var ethereumUtil = require('ethereumjs-util');
+var ethUtil = require('ethereumjs-util');
 var Big = require('big.js');
 var sha3 = require('keccakjs');
-var EthJSUtil = require("ethereumjs-util");
 
 Util.bnToByteArrayUnsigned = function(bn) {
   var ba = bn.abs().toByteArray();
@@ -39,27 +38,27 @@ Util.xpubToEthAddress = function(xpub) {
 Util.xprvToEthPrivateKey = function(xprv) {
   var hdNode = bitcoin.HDNode.fromBase58(xprv);
   var ethPrivateKey = hdNode.keyPair.d.toBuffer();
-  return EthJSUtil.setLengthLeft(ethPrivateKey, 32).toString('hex');
+  return ethUtil.setLengthLeft(ethPrivateKey, 32).toString('hex');
 };
 
 // Sign a message using Ethereum's ECsign method and return the signature string
 Util.ethSignMsgHash = function(msgHash, privKey) {
-  var signatureInParts = EthJSUtil.ecsign(new Buffer(EthJSUtil.stripHexPrefix(msgHash), 'hex'), new Buffer(privKey, 'hex'));
+  var signatureInParts = ethUtil.ecsign(new Buffer(ethUtil.stripHexPrefix(msgHash), 'hex'), new Buffer(privKey, 'hex'));
 
   // Assemble strings from r, s and v
-  var r = EthJSUtil.setLengthLeft(signatureInParts.r, 32).toString('hex');
-  var s = EthJSUtil.setLengthLeft(signatureInParts.s, 32).toString('hex');
-  var v = EthJSUtil.stripHexPrefix(EthJSUtil.intToHex(signatureInParts.v));
+  var r = ethUtil.setLengthLeft(signatureInParts.r, 32).toString('hex');
+  var s = ethUtil.setLengthLeft(signatureInParts.s, 32).toString('hex');
+  var v = ethUtil.stripHexPrefix(ethUtil.intToHex(signatureInParts.v));
 
   // Concatenate the r, s and v parts to make the signature string
-  return EthJSUtil.addHexPrefix(r.concat(s, v));
+  return ethUtil.addHexPrefix(r.concat(s, v));
 };
 
 // Convert from wei string (or BN) to Ether (multiply by 1e18)
 Util.weiToEtherString = function(wei) {
   var bn = wei;
-  if (!(wei instanceof ethereumUtil.BN)) {
-    bn = new ethereumUtil.BN(wei);
+  if (!(wei instanceof ethUtil.BN)) {
+    bn = new ethUtil.BN(wei);
   }
   Big.E_POS = 256;
   Big.E_NEG = -18;

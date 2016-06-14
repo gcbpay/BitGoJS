@@ -11,8 +11,8 @@ var ethereumUtil = require('ethereumjs-util');
 var Keychains = require('../keychains');
 var PendingApproval = require('../pendingapproval');
 var Util = require('../util');
-var EthJSUtil = require("ethereumjs-util");
-var EthJSABI = require('ethereumjs-abi');
+var ethUtil = require("ethereumjs-util");
+var ethAbi = require('ethereumjs-abi');
 
 
 var assert = require('assert');
@@ -340,7 +340,7 @@ var getOperationSha3ForExecuteAndConfirm = function(recipients, expireTime, sequ
   // Check inputs
   recipients.forEach(function(recipient) {
     if (typeof(recipient.toAddress) !== 'string' ||
-      EthJSUtil.stripHexPrefix(recipient.toAddress).length !== 40) {
+      ethUtil.stripHexPrefix(recipient.toAddress).length !== 40) {
       throw new Error("Invalid address: " + recipient.toAddress);
     }
 
@@ -354,12 +354,12 @@ var getOperationSha3ForExecuteAndConfirm = function(recipients, expireTime, sequ
   });
 
   var recipient = recipients[0];
-  return EthJSUtil.bufferToHex(EthJSABI.soliditySHA3(
+  return ethUtil.bufferToHex(ethAbi.soliditySHA3(
     [ "address", "uint", "string", "uint", "uint" ],
     [
-      new EthJSUtil.BN(EthJSUtil.stripHexPrefix(recipient.toAddress), 16),
+      new ethUtil.BN(ethUtil.stripHexPrefix(recipient.toAddress), 16),
       recipient.value,
-      EthJSUtil.stripHexPrefix(recipient.data) || "",
+      ethUtil.stripHexPrefix(recipient.data) || "",
       expireTime,
       sequenceId
     ]
