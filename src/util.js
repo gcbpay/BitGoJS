@@ -2,7 +2,6 @@ var Util = module.exports;
 var bitcoin = require('bitcoinjs-lib');
 var ethereumUtil = require('ethereumjs-util');
 var Big = require('big.js');
-var sha3 = require('keccakjs');
 var EthJSUtil = require("ethereumjs-util");
 
 Util.bnToByteArrayUnsigned = function(bn) {
