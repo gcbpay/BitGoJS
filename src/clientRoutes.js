@@ -272,6 +272,6 @@ exports = module.exports = function(app, args) {
   app.put('/api/v1/wallet/:id/fanoutunspents', parseBody, prepareBitGo(args), promiseWrapper(handleFanOutUnspents, args));
 
   // eth
-  app.post('/api/v1/eth/wallets/simplecreate', parseBody, prepareBitGo(args), promiseWrapper(handleEthGenerateWallet, args));
+  app.post('/api/v1/eth/wallets/generate', parseBody, prepareBitGo(args), promiseWrapper(handleEthGenerateWallet, args));
   app.post('/api/v1/eth/wallet/:id/sendtransaction', parseBody, prepareBitGo(args), promiseWrapper(handleEthSendTransaction, args));
 };
