@@ -415,7 +415,7 @@ EthWallet.prototype.sendTransaction = function(params, callback) {
   })
   .spread(function(keychain, prebuildParams) {
     var secondsSinceEpoch = Math.floor((new Date().getTime()) / 1000);
-    var expireTime = params.expireTime || (Math.floor((new Date().getTime()) / 1000) + EXPIRETIME_DEFAULT);
+    var expireTime = params.expireTime || secondsSinceEpoch + EXPIRETIME_DEFAULT;
 
     var operationHash = getOperationSha3ForExecuteAndConfirm(params.recipients, expireTime, prebuildParams.nextSequenceId);
     var signature = Util.ethSignMsgHash(operationHash, Util.xprvToEthPrivateKey(keychain.xprv));
