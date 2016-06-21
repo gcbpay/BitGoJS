@@ -141,6 +141,17 @@ describe('Bitgo Express', function() {
       });
     });
 
+    it('error - not authed (eth)', function(done) {
+      agent.post('/api/v1/eth/wallets/generate')
+      .send({ passphrase:'abc', label:'helloworld' })
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
+        if (err) { throw err; }
+        res.should.have.status(401);
+        done();
+      });
+    });
+
     it('new keychain', function(done) {
       agent.post('/api/v1/keychain/local')
       .send()
@@ -221,6 +232,33 @@ describe('Bitgo Express', function() {
           res.body.should.have.property('wallet');
           res.body.should.have.property('backupKeychain');
           res.body.backupKeychain.should.have.property('xpub');
+          res.body.backupKeychain.xpub.should.equal(backupXpub);
+          done();
+        });
+      });
+    });
+
+    it('create eth wallet', function(done) {
+      agent.post('/api/v1/user/unlock')
+      .set('Authorization', 'Bearer ' + TestBitGo.TEST_ACCESSTOKEN)
+      .send({ otp: '0000000', duration: 5 })
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
+        if (err) { throw err; }
+        res.should.have.status(200);
+
+        var backupXpub = "xpub6AHA9hZDN11k2ijHMeS5QqHx2KP9aMBRhTDqANMnwVtdyw2TDYRmF8PjpvwUFcL1Et8Hj59S3gTSMcUQ5gAqTz3Wd8EsMTmF3DChhqPQBnU";
+        agent.post('/api/v1/eth/wallets/generate')
+        .set('Authorization', 'Bearer ' + TestBitGo.TEST_ACCESSTOKEN)
+        .send({ passphrase: "chamchatka", label: "kokoko", backupXpub: backupXpub })
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if (err) { throw err; }
+          res.should.have.status(200);
+          res.body.should.have.property('wallet');
+          res.body.should.have.property('backupKeychain');
+          res.body.backupKeychain.should.have.property('xpub');
+          res.body.backupKeychain.should.have.property('ethAddress');
           res.body.backupKeychain.xpub.should.equal(backupXpub);
           done();
         });
