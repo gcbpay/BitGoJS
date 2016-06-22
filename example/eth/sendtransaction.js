@@ -5,7 +5,7 @@ var BitGoJS = require('../../src/index.js');
 var BN = require("ethereumjs-util").BN;
 
 if (process.argv.length < 6) {
-  console.log("usage:\n\t" + process.argv[0] + " " + process.argv[1] + " <user> <pass> <otp> <label> <backupXpub>");
+  console.log("usage:\n\t" + process.argv[0] + " " + process.argv[1] + " <user> <pass> <walletId> <toAddress> <valueWei>");
   process.exit(-1);
 }
 
@@ -15,9 +15,9 @@ var walletId = process.argv[4];
 var toAddress = process.argv[5];
 var valueWei = process.argv[6];
 // var valueWei = new BN(process.argv[6], 10).toString(10); // can't do floats!!!!
+var otp = '0000000';
 
 var bitgo = new BitGoJS.BitGo();
-var otp = '0000000';
 
 var sendTransaction = function() {
   console.log("Getting wallet..");

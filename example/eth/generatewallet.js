@@ -9,19 +9,19 @@
 
 var BitGoJS = require('../../src/index.js');
 
-if (process.argv.length < 6) {
-  console.log("usage:\n\t" + process.argv[0] + " " + process.argv[1] + " <user> <pass> <otp> <label> <backupXpub>");
+if (process.argv.length < 5) {
+  console.log("usage:\n\t" + process.argv[0] + " " + process.argv[1] + " <user> <pass> <label> [backupXpub]");
   process.exit(-1);
 }
 
 var user = process.argv[2];
 var password = process.argv[3];
-var otp = process.argv[4];
-var label = process.argv[5];
+var otp = '0000000';
+var label = process.argv[4];
 
 var backupXpub = null;
-if (process.argv.length > 6) {
-  backupXpub = process.argv[6];
+if (process.argv.length > 5) {
+  backupXpub = process.argv[5];
 }
 
 var bitgo = new BitGoJS.BitGo();

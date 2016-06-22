@@ -4,15 +4,15 @@
 var BitGoJS = require('../../src/index.js');
 var BN = require("ethereumjs-util").BN;
 
-if (process.argv.length < 6) {
-  console.log("usage:\n\t" + process.argv[0] + " " + process.argv[1] + " <user> <password> <otp> <walletId>");
+if (process.argv.length < 5) {
+  console.log("usage:\n\t" + process.argv[0] + " " + process.argv[1] + " <user> <password> <walletId>");
   process.exit(-1);
 }
 
 var user = process.argv[2];
 var password = process.argv[3];
-var otp = process.argv[4];
-var walletId = process.argv[5];
+var otp = '0000000';
+var walletId = process.argv[4];
 var _ = require('lodash');
 
 var bitgo = new BitGoJS.BitGo();
@@ -35,6 +35,7 @@ var getTransactions = function() {
       console.log("Start: " + res.start);
       console.log("Limit: " + res.limit);
       console.log("Transactions: ");
+      
       console.dir(prettyTxs);
     });
   });
