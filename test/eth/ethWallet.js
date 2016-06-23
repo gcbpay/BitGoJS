@@ -186,13 +186,13 @@ describe('Ethereum Wallet API:', function() {
         // result.should.have.property('total');
         result.should.have.property('count');
         result.start.should.eql(0);
-        txHash0 = result.transactions[0].id;
+        txHash0 = result.transactions[0].txHash;
       });
     });
 
     var limitedTxes;
     var limitTestNumTx = 6;
-    var totalTxCount;
+    // var totalTxCount;
     it('list with limit', function() {
       var options = { limit: limitTestNumTx };
       return wallet1.transactions(options)
@@ -204,7 +204,7 @@ describe('Ethereum Wallet API:', function() {
         result.count.should.eql(limitTestNumTx);
         result.transactions.length.should.eql(result.count);
         limitedTxes = result.transactions;
-        totalTxCount = result.total;
+        // totalTxCount = result.total;
       });
     });
 
@@ -221,10 +221,10 @@ describe('Ethereum Wallet API:', function() {
         result.transactions.length.should.eql(result.count);
         result.transactions.forEach(function(transaction) {
           if (!transaction.pending) {
-            transaction.height.should.be.above(minHeight - 1);
+            transaction.blockHeight.should.be.above(minHeight - 1);
           }
         });
-        result.total.should.be.below(totalTxCount);
+        // result.count.should.be.below(totalTxCount);
       });
     });
 
@@ -234,7 +234,6 @@ describe('Ethereum Wallet API:', function() {
       var options = { limit: (limitTestNumTx - skipNum), skip: skipNum };
       return wallet1.transactions(options)
       .then(function(result){
-        assert.equal(err, null);
         assert.equal(Array.isArray(result.transactions), true);
         // result.should.have.property('total');
         result.should.have.property('count');
@@ -263,7 +262,7 @@ describe('Ethereum Wallet API:', function() {
     it('get transaction with travel info', function() {
       var keychain;
       var options = {
-        xpub: wallet1.keychains[0].xpub
+        ethAddress: wallet1.addresses[0].address
       };
       return bitgo.keychains().get(options)
       .then(function(res) {
@@ -298,12 +297,48 @@ describe('Ethereum Wallet API:', function() {
       return wallet1.transfers(options)
       .then(function(result) {
         assert.equal(Array.isArray(result.transfers), true);
-        result.should.have.property('total');
-        // result.should.have.property('count');
+        // result.should.have.property('total');
+        result.should.have.property('count');
         result.start.should.eql(0);
         txHash0 = result.transfers[0].id;
       });
     });
+
+    var limitedTransfers;
+    var limitTestNumTransfers = 4;
+    var totalTransferCount;
+    it('list with limit', function() {
+      var options = { limit: limitTestNumTransfers };
+      return wallet1.transfers(options)
+      .then(function(result) {
+        assert.equal(Array.isArray(result.transfers), true);
+        // result.should.have.property('total');
+        result.should.have.property('count');
+        result.start.should.eql(0);
+        result.count.should.eql(limitTestNumTransfers);
+        result.transfers.length.should.eql(result.count);
+        limitedTransfers = result.transfers;
+        // totalTransferCount = result.total;
+      });
+    });
+
+    it('list with limit and skip', function() {
+      var skipNum = 2;
+      var options = { limit: (limitTestNumTransfers - skipNum), skip: skipNum };
+      return wallet1.transfers(options)
+      .then(function(result){
+        assert.equal(Array.isArray(result.transfers), true);
+        // result.should.have.property('total');
+        result.should.have.property('count');
+        result.start.should.eql(skipNum);
+        // result.total.should.eql(limitTestNumTransfers);
+        result.count.should.eql(limitTestNumTransfers - skipNum);
+        result.transfers.length.should.eql(result.count);
+        limitedTransfers = limitedTransfers.slice(skipNum);
+        result.transfers.should.eql(limitedTransfers);
+      });
+    });
+
   });
 
   describe('Get wallet user encrypted key', function() {
