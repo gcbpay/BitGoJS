@@ -192,7 +192,6 @@ describe('Ethereum Wallet API:', function() {
 
     var limitedTxes;
     var limitTestNumTx = 6;
-    // var totalTxCount;
     it('list with limit', function() {
       var options = { limit: limitTestNumTx };
       return wallet1.transactions(options)
@@ -204,7 +203,6 @@ describe('Ethereum Wallet API:', function() {
         result.count.should.eql(limitTestNumTx);
         result.transactions.length.should.eql(result.count);
         limitedTxes = result.transactions;
-        // totalTxCount = result.total;
       });
     });
 
@@ -349,7 +347,7 @@ describe('Ethereum Wallet API:', function() {
       done();
     });
 
-    it('get key', function(done) {
+    it('get key', function() {
       var options = {};
       return bitgo.unlock({ otp: '0000000' })
       .then(function() {
@@ -357,9 +355,10 @@ describe('Ethereum Wallet API:', function() {
       })
       .then(function(result) {
         result.should.have.property('xpub');
-        assert.equal(result.xpub, TestBitGo.TEST_ETH_WALLET1_XPUB);
+        var resultXpub = result.xpub;
+        var expectedXpub = TestBitGo.TEST_ETH_WALLET1_XPUB;
+        result.xpub.should.equal(TestBitGo.TEST_ETH_WALLET1_XPUB);
         result.should.have.property('encryptedXprv');
-        done();
       });
     });
   });

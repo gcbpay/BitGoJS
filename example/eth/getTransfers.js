@@ -2,7 +2,6 @@
 // Sends an Ethereum transaction on BitGo
 //
 var BitGoJS = require('../../src/index.js');
-var BN = require("ethereumjs-util").BN;
 
 if (process.argv.length < 5) {
   console.log("usage:\n\t" + process.argv[0] + " " + process.argv[1] + " <user> <password> <walletId>");
@@ -33,14 +32,6 @@ var getTransactions = function() {
         throw err;
       }
       console.dir(res);
-      /* var interestingFields = ['txHash', 'parentTxHash', 'from', 'to', 'value', 'blockHash', 'confirmations', 'type', 'receiveTime'];
-      var prettyTxs = _.map(res.transactions, function(t) { return _.pick(t, interestingFields); });
-      console.log("Count: " + res.count);
-      console.log("Start: " + res.start);
-      console.log("Limit: " + res.limit);
-      console.log("Transactions: ");
-      
-      console.dir(prettyTxs); */
     });
   });
 };

@@ -91,7 +91,7 @@ BitGo.prototype.initializeTestVars = function() {
 
   // Ethereum test variables
   BitGo.TEST_ETH_WALLET1_PASSCODE = 'test wallet #1 security';
-  BitGo.TEST_ETH_WALLET1_XPUB = 'xpub661MyMwAqRbcGzRyWVK2d6S1ZgMS9Yeaj6vZgDxgUwu97cCs6psjrNT26qTac8vd6Y7Nxecwt4GEw5qRPi8e2mBNLoSqPNp6XtNP4cZKBxV';
+  BitGo.TEST_ETH_WALLET1_XPUB = 'xpub661MyMwAqRbcGArHN1PcNHNhyJb5rZkjNxBorDumey6wv1CX6E3mhVqBpdwG93dusK8LHm4ts9HDk3bfB4hnF6R2Lc14Axm5tKSsh2xh2xw';
   BitGo.TEST_ETH_WALLET1_ADDRESS = '0x5cd7e5cf09b93b3f84603acfba0191f09fbb12e7';
   BitGo.TEST_ETH_WALLET1_ADDRESS2 = '0xeab1cac0d744e99289c1798c280961172e63b508';
   // BitGo.TEST_ETH_WALLET1_ADDRESS2 = '0x46c383d36e42cae2b718406297451f67fa671a9a';
