@@ -65,3 +65,20 @@ Util.weiToEtherString = function(wei) {
   var ether = big.div('1000000000000000000');
   return ether.toPrecision();
 };
+
+Util.preparePageableQuery = function(params) {
+  var query = {};
+  if (params.limit) {
+    if (typeof(params.limit) != 'number') {
+      throw new Error('invalid limit argument, expecting number');
+    }
+    query.limit = params.limit;
+  }
+  if (params.skip) {
+    if (typeof(params.skip) != 'number') {
+      throw new Error('invalid skip argument, expecting number');
+    }
+    query.skip = params.skip;
+  }
+  return query;
+};

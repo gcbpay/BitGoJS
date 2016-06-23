@@ -227,33 +227,35 @@ EthWallet.prototype.transactions = function(params, callback) {
   params = params || {};
   common.validateParams(params, [], [], callback);
 
-  var args = [];
-  if (params.limit) {
-    if (typeof(params.limit) != 'number') {
-      throw new Error('invalid limit argument, expecting number');
-    }
-    args.push('limit=' + params.limit);
-  }
-  if (params.skip) {
-    if (typeof(params.skip) != 'number') {
-      throw new Error('invalid skip argument, expecting number');
-    }
-    args.push('skip=' + params.skip);
-  }
+  var query = Util.preparePageableQuery(params);
   if (params.minHeight) {
     if (typeof(params.minHeight) != 'number') {
       throw new Error('invalid minHeight argument, expecting number');
     }
-    args.push('minHeight=' + params.minHeight);
-  }
-  var query = '';
-  if (args.length) {
-    query = '?' + args.join('&');
+    query.minHeight = params.minHeight;
   }
 
-  var url = this.url('/tx' + query);
+  var url = this.url('/tx');
 
   return this.bitgo.get(url)
+  .query(query)
+  .result()
+  .nodeify(callback);
+};
+
+//
+// transfers
+// List the transfers for a given wallet
+// Options include: skip, limit, minHeight
+EthWallet.prototype.transfers = function(params, callback) {
+  params = params || {};
+  common.validateParams(params, [], [], callback);
+
+  var query = Util.preparePageableQuery(params);
+  var url = this.url('/transfer');
+
+  return this.bitgo.get(url)
+  .query(query)
   .result()
   .nodeify(callback);
 };
@@ -266,6 +268,20 @@ EthWallet.prototype.getTransaction = function(params, callback) {
   common.validateParams(params, ['id'], [], callback);
 
   var url = this.url('/tx/' + params.id);
+
+  return this.bitgo.get(url)
+  .result()
+  .nodeify(callback);
+};
+
+//
+// transfer
+// Get a transfer by ID for a given wallet
+EthWallet.prototype.getTransfer = function(params, callback) {
+  params = params || {};
+  common.validateParams(params, ['id'], [], callback);
+
+  var url = this.url('/transfer/' + params.id);
 
   return this.bitgo.get(url)
   .result()
