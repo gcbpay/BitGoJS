@@ -247,13 +247,13 @@ describe('Ethereum Wallet API:', function() {
       var options = { id: txHash0 };
       return wallet1.getTransaction(options)
       .then(function(result) {
-        result.should.have.property('fee');
-        result.should.have.property('outputs');
-        result.outputs.length.should.not.eql(0);
-        result.should.have.property('entries');
-        result.entries.length.should.not.eql(0);
-        result.should.have.property('confirmations');
-        result.should.have.property('hex');
+        result.transaction.should.have.property('gas');
+        result.transaction.should.have.property('gasUsed');
+        result.transaction.should.have.property('gasPrice');
+        result.transaction.should.have.property('entries');
+        result.transaction.entries.length.should.not.eql(0);
+        result.transaction.should.have.property('confirmations');
+        result.transaction.should.have.property('txHash');
       });
     });
 
