@@ -120,7 +120,7 @@ EthWallets.prototype.getWallet = function(params, callback) {
 // }
 EthWallets.prototype.generateWallet = function(params, callback) {
   params = params || {};
-  common.validateParams(params, ['passphrase'], ['label', 'backupAddress', 'backupXpub', 'backupXpubProvider', 'enterprise'], callback);
+  common.validateParams(params, ['passphrase', 'label'], ['backupAddress', 'backupXpub', 'backupXpubProvider', 'enterprise'], callback);
   var self = this;
 
   if ((!!params.backupAddress + !!params.backupXpub + !!params.backupXpubProvider) > 1) {
