@@ -171,6 +171,18 @@ describe('Ethereum Wallet API:', function() {
     });
   });
 
+  describe('Create Address', function() {
+    it('should create a proxy contract', function() {
+      return wallet1.createAddress()
+      .then(function(address) {
+        address.should.have.property('address');
+        address.should.have.property('deploymentTxHash');
+        address.should.have.property('walletNonce');
+        address.walletAddress.should.equal(wallet1.id());
+      });
+    });
+  });
+
   describe('Transactions', function() {
     it('arguments', function() {
       assert.throws(function() { wallet1.transactions('invalid', function() {}); });
@@ -218,7 +230,8 @@ describe('Ethereum Wallet API:', function() {
         result.start.should.eql(0);
         result.transactions.length.should.eql(result.count);
         result.transactions.forEach(function(transaction) {
-          if (!transaction.pending) {
+          if (!transaction.confirmations > 0) {
+            transaction.should.have.property('blockHeight');
             transaction.blockHeight.should.be.above(minHeight - 1);
           }
         });
@@ -248,39 +261,16 @@ describe('Ethereum Wallet API:', function() {
       return wallet1.getTransaction(options)
       .then(function(result) {
         result.transaction.should.have.property('gas');
-        result.transaction.should.have.property('gasUsed');
+        // gas used only there if confirmations > 0
         result.transaction.should.have.property('gasPrice');
         result.transaction.should.have.property('entries');
         result.transaction.entries.length.should.not.eql(0);
         result.transaction.should.have.property('confirmations');
         result.transaction.should.have.property('txHash');
+        result.transaction.should.have.property('blockHeight');
       });
     });
 
-    it('get transaction with travel info', function() {
-      var keychain;
-      var options = {
-        ethAddress: wallet1.addresses[0].address
-      };
-      return bitgo.keychains().get(options)
-      .then(function(res) {
-        keychain = res;
-        res.xprv = bitgo.decrypt({ password: TestBitGo.TEST_ETH_WALLET3_PASSCODE, input: keychain.encryptedXprv });
-        return wallet3.getTransaction({ id: TestBitGo.TRAVEL_RULE_TXID });
-      })
-      .then(function(tx) {
-        tx.should.have.property('receivedTravelInfo');
-        tx.receivedTravelInfo.should.have.length(2);
-        tx = bitgo.travelRule().decryptReceivedTravelInfo({ tx: tx, keychain: keychain });
-        var infos = tx.receivedTravelInfo;
-        infos.should.have.length(2);
-        var info = infos[0].travelInfo;
-        info.fromUserName.should.equal('Alice');
-        info.toEnterprise.should.equal('SDKOther');
-        info = infos[1].travelInfo;
-        info.fromUserName.should.equal('Bob');
-      });
-    });
   });
 
   describe('Transfers', function() {

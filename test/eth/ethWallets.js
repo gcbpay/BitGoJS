@@ -298,6 +298,39 @@ describe('Ethereum Wallets API:', function() {
         return wallet.delete({});
       });
     });
+
+    it('create with different backup xpub provider (KRS wallet)', function() {
+      var options = {
+        "passphrase": TestBitGo.TEST_WALLET1_PASSCODE,
+        "label": TEST_WALLET_LABEL,
+        "backupXpubProvider": "keyternal"
+      };
+
+      return bitgo.eth().wallets().generateWallet(options)
+      .then(function(result) {
+        assert.notEqual(result, null);
+
+        result.should.have.property('wallet');
+        var wallet = result.wallet;
+
+        assert.equal(wallet.balance(), 0);
+        // assert.equal(wallet.spendableBalance(), 0);
+        assert.equal(wallet.label(), TEST_WALLET_LABEL);
+        // assert.equal(wallet.confirmedBalance(), 0);
+        assert.equal(wallet.addresses.length, 3);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[0].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[1].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[2].address }), true);
+        assert.equal(wallet.addresses[0].address, result.userKeychain.ethAddress);
+        assert.equal(wallet.addresses[1].address, result.backupKeychain.ethAddress);
+
+        result.userKeychain.should.have.property('encryptedXprv');
+        result.backupKeychain.should.not.have.property('encryptedXprv');
+        result.should.not.have.property('warning');
+
+        return wallet.delete({});
+      });
+    });
   });
 
   describe('Get', function() {

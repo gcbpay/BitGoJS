@@ -310,6 +310,16 @@ EthWallet.prototype.getEncryptedUserKeychain = function(params, callback) {
 };
 
 //
+// createAddress
+// Creates a forwarder/proxy contract that redirects funds to the main wallet
+//
+EthWallet.prototype.createAddress = function(params, callback) {
+  return this.bitgo.post(this.url('/address'))
+  .result()
+  .nodeify(callback);
+};
+
+//
 // getTransactionPreBuildParams
 // Gets transaction pre-build parameters on this wallet
 //
