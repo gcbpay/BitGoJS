@@ -156,9 +156,6 @@ EthWallets.prototype.generateWallet = function(params, callback) {
         provider: params.backupXpubProvider,
         disableKRSEmail: params.disableKRSEmail,
         type: 'eth'
-      })
-      .then(function(keychain) {
-        backupKeychain = keychain;
       });
     }
 
@@ -178,13 +175,17 @@ EthWallets.prototype.generateWallet = function(params, callback) {
     }
     return self.bitgo.keychains().add(backupKeychain);
   })
-  .then(function() {
-    // the backup keychain may have only been created after the KRS call was completed
-    if (backupKeychain) {
+  .then(function(newBackupKeychain) {
+    // the backup keychain might be null if only ethAddress was provided
+    if (newBackupKeychain) {
+      // add properties returned from server to backupKeychain for fields that are not already defined
+      // for fields that are defined, keep the original, client-side definition
+      backupKeychain = _.extend({}, newBackupKeychain, backupKeychain);
+
       if (backupKeychain.xprv) {
         backupKeychain.encryptedXprv = self.bitgo.encrypt({ password: params.passphrase, input: backupKeychain.xprv });
       }
-      backupAddress = Util.xpubToEthAddress(backupKeychain.xpub);
+      backupAddress = backupKeychain.ethAddress;
     }
   });
 

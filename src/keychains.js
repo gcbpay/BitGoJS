@@ -151,7 +151,7 @@ Keychains.prototype.add = function(params, callback) {
   .send(params)
   .result()
   .then(function(keychain){
-    if (keychain.xpub && keychain.ethAddress && keychain.ethAddress !== Util.xpubToEthAddress(keychain.xpub)) {
+    if (keychain.xpub && keychain.ethAddress !== Util.xpubToEthAddress(keychain.xpub)) {
       throw new Error('ethAddress and xpub do not match');
     }
     return keychain;

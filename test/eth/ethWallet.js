@@ -22,14 +22,14 @@ Q.longStackTrace = true;
 // TODO: WORK IN PROGRESS
 describe('Ethereum Wallet API:', function() {
   var bitgo;
-  var wallet1, wallet2, wallet3, safewallet;
+  var wallet1, wallet2;
 
   before(function() {
     BitGoJS.setNetwork('testnet');
 
     bitgo = new TestBitGo();
     bitgo.initializeTestVars();
-    wallets = bitgo.eth().wallets();
+    var wallets = bitgo.eth().wallets();
     return bitgo.authenticateTestUser(bitgo.testUserOTP())
     .then(function() {
       // Fetch the first wallet.
@@ -49,24 +49,6 @@ describe('Ethereum Wallet API:', function() {
     })
     .then(function(wallet) {
       wallet2 = wallet;
-
-      // Fetch the third wallet
-      var options = {
-        id: TestBitGo.TEST_ETH_WALLET3_ADDRESS
-      };
-      return wallets.get(options);
-    })
-    .then(function(wallet) {
-      wallet3 = wallet;
-
-      // Fetch legacy safe wallet
-      var options = {
-        id: TestBitGo.TEST_ETH_WALLET4_ADDRESS
-      };
-      return wallets.get(options);
-    })
-    .then(function(wallet) {
-      safewallet = wallet;
     });
   });
 
@@ -176,7 +158,7 @@ describe('Ethereum Wallet API:', function() {
       return wallet1.createAddress()
       .then(function(address) {
         address.should.have.property('address');
-        address.should.have.property('deploymentTxHash');
+        address.should.have.property('deployTxHash');
         address.should.have.property('walletNonce');
         address.walletAddress.should.equal(wallet1.id());
       });

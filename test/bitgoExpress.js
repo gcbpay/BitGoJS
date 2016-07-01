@@ -9,7 +9,7 @@ var request = require("supertest-as-promised");
 var _ = require('lodash');
 
 var BitGoJS = require('../src/index');
-var expessApp = require('../src/expressApp');
+var expressApp = require('../src/expressApp');
 var TestBitGo = require('./lib/test_bitgo');
 
 describe('Bitgo Express', function() {
@@ -23,7 +23,7 @@ describe('Bitgo Express', function() {
     };
     bitgo = new TestBitGo();
     bitgo.initializeTestVars();
-    var app = expessApp(args);
+    var app = expressApp(args);
     agent = request.agent(app);
     done();
   });
@@ -42,7 +42,7 @@ describe('Bitgo Express', function() {
     });
 
     it('error - proxied calls disabled', function(done) {
-      var app = expessApp(_.extend(
+      var app = expressApp(_.extend(
         {},
         {
           debug: false,

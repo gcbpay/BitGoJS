@@ -13,10 +13,6 @@ var TestBitGo = require('../lib/test_bitgo');
 var TEST_ADDRESS1 = '0x8ce4949d8a16542d423c17984e6739fa72ceb177';
 var TEST_MANYTRANSACTIONSADDRESS = '0x8ce4949d8a16542d423c17984e6739fa72ceb177';
 
-var TEST_TRANSACTION = '0xc0c1c720bc5b3583ad3a4075730b44c0c120a0fe660e51817f8c857bf37dbec0';
-
-var TEST_BLOCK = '0xbee4330cdd56d2bcc47fa42e52e3c089c649b209acc0ae5611f6c7bc7c0b350e';
-
 // TODO: WORK IN PROGRESS
 describe('Ethereum Blockchain API:', function() {
   var bitgo;
@@ -105,7 +101,7 @@ describe('Ethereum Blockchain API:', function() {
     });
 
     it('get', function() {
-      return blockchain.getTransaction({ id: TEST_TRANSACTION })
+      return blockchain.getTransaction({ id: TestBitGo.TEST_ETH_TRANSACTION })
       .then(function(transaction) {
         transaction.transaction.should.have.property('txHash');
         transaction.transaction.should.have.property('receiveTime');
@@ -139,15 +135,15 @@ describe('Ethereum Blockchain API:', function() {
     });
 
     it('get', function() {
-      return blockchain.getBlock({ id: TEST_BLOCK })
+      return blockchain.getBlock({ id: TestBitGo.TEST_ETH_BLOCK })
       .then(function(block) {
         block.should.have.property('height');
         block.should.have.property('createTime');
         block.should.have.property('parentHash');
         block.should.have.property('transactions');
-        block.height.should.equal(46239);
-        block.parentHash.should.equal('0x43df14fa812e4862a13db5330a838b0b112bbbb1c293ff1ce97d13fd6626b389');
-        block.transactions.should.include('0xc0c1c720bc5b3583ad3a4075730b44c0c120a0fe660e51817f8c857bf37dbec0');
+        block.height.should.be.above(45000);
+        block.parentHash.should.equal(TestBitGo.TEST_ETH_PARENT_BLOCK);
+        block.transactions.should.include(TestBitGo.TEST_ETH_TRANSACTION);
       });
     });
   });

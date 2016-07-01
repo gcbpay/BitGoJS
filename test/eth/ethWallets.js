@@ -187,7 +187,7 @@ describe('Ethereum Wallets API:', function() {
     });
   });
 
-  describe('Create wallet', function() {
+  describe('Create Ether Wallet', function() {
     it('arguments', function() {
       assert.throws(function() { wallets.generateWallet({"passphrase": TestBitGo.TEST_WALLET1_PASSCODE, "backupAddress": backupXpub}); });
       assert.throws(function() { wallets.generateWallet({"passphrase": TestBitGo.TEST_WALLET1_PASSCODE, "label": TEST_WALLET_LABEL, "backupAddress": backupXpub}); });
@@ -225,6 +225,43 @@ describe('Ethereum Wallets API:', function() {
         result.backupKeychain.should.have.property('xprv');
         result.backupKeychain.should.have.property('encryptedXprv');
         result.warning.should.include('back up the backup keychain -- it is not stored anywhere else');
+
+        return wallet.delete({});
+      });
+    });
+
+    it('create with cold backup xpub', function() {
+
+      // Simulate a cold backup key
+      var coldBackupKey = bitgo.keychains().create();
+      var options = {
+        "passphrase": TestBitGo.TEST_WALLET1_PASSCODE,
+        "label": TEST_WALLET_LABEL,
+        "backupXpub": coldBackupKey.xpub
+        // "backupXpub": 'xpub6AHA9hZDN11k2ijHMeS5QqHx2KP9aMBRhTDqANMnwVtdyw2TDYRmF8PjpvwUFcL1Et8Hj59S3gTSMcUQ5gAqTz3Wd8EsMTmF3DChhqPQBnU'
+      };
+
+      return bitgo.eth().wallets().generateWallet(options)
+      .then(function(result) {
+        assert.notEqual(result, null);
+
+        result.should.have.property('wallet');
+        var wallet = result.wallet;
+
+        assert.equal(wallet.balance(), 0);
+        assert.equal(wallet.label(), TEST_WALLET_LABEL);
+        // assert.equal(wallet.confirmedBalance(), 0);
+        assert.equal(wallet.addresses.length, 3);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[0].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[1].address }), true);
+        assert.equal(bitgo.keychains().isValid({ ethAddress: wallet.addresses[2].address }), true);
+        assert.equal(wallet.addresses[0].address, result.userKeychain.ethAddress);
+        assert.equal(wallet.addresses[1].address, coldBackupKey.ethAddress);
+
+        result.userKeychain.should.have.property('encryptedXprv');
+        // result.backupKeychain.should.have.property('xpub');
+        // result.backupKeychain.should.not.have.property('xprv');
+        // result.backupKeychain.should.not.have.property('encryptedXprv');
 
         return wallet.delete({});
       });
