@@ -327,7 +327,7 @@ EthWallet.prototype.createAddress = function(params, callback) {
 //  {
 //    gasLimit: maximum amount of gas this transaction will likely cost,
 //    gasprice: current market rate per gas,
-//    nextSequenceId: next sequence id to sign with on the wallet
+//    nextContractSequenceId: next sequence id to sign with on the wallet
 //  }
 //
 EthWallet.prototype.getTransactionPreBuildParams = function(params, callback) {
@@ -349,7 +349,7 @@ EthWallet.prototype.getTransactionPreBuildParams = function(params, callback) {
 //   recipients: [] array of { toAddress, value, data } objects
 //   expireTime: unix timestamp (seconds since 1970) when the first signature will expire
 //
-var getOperationSha3ForExecuteAndConfirm = function(recipients, expireTime, sequenceId) {
+var getOperationSha3ForExecuteAndConfirm = function(recipients, expireTime, contractSequenceId) {
   if (!recipients || !Array.isArray(recipients)) {
     throw new Error('expecting array of recipients');
   }
@@ -363,8 +363,8 @@ var getOperationSha3ForExecuteAndConfirm = function(recipients, expireTime, sequ
     throw new Error("expireTime must be number of seconds since epoch");
   }
 
-  if (typeof(sequenceId) !== 'number') {
-    throw new Error("sequenceId must be number");
+  if (typeof(contractSequenceId) !== 'number') {
+    throw new Error("contractSequenceId must be number");
   }
 
   // Check inputs
@@ -390,7 +390,7 @@ var getOperationSha3ForExecuteAndConfirm = function(recipients, expireTime, sequ
       recipient.value,
       ethUtil.stripHexPrefix(recipient.data) || "",
       expireTime,
-      sequenceId
+      contractSequenceId
     ]
   ));
 };
@@ -469,13 +469,14 @@ EthWallet.prototype.sendTransaction = function(params, callback) {
     var secondsSinceEpoch = Math.floor((new Date().getTime()) / 1000);
     var expireTime = params.expireTime || secondsSinceEpoch + EXPIRETIME_DEFAULT;
 
-    var operationHash = getOperationSha3ForExecuteAndConfirm(params.recipients, expireTime, prebuildParams.nextSequenceId);
+    var operationHash = getOperationSha3ForExecuteAndConfirm(params.recipients, expireTime, prebuildParams.nextContractSequenceId);
     var signature = Util.ethSignMsgHash(operationHash, Util.xprvToEthPrivateKey(keychain.xprv));
 
     var txParams = {
       recipients: params.recipients,
       expireTime: expireTime,
-      sequenceId: prebuildParams.nextSequenceId,
+      contractSequenceId: prebuildParams.nextContractSequenceId,
+      sequenceId: params.sequenceId,
       operationHash: operationHash,
       signature: signature
     };
