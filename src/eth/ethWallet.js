@@ -350,6 +350,10 @@ EthWallet.prototype.getTransactionPreBuildParams = function(params, callback) {
 //   expireTime: unix timestamp (seconds since 1970) when the first signature will expire
 //
 var getOperationSha3ForExecuteAndConfirm = function(recipients, expireTime, sequenceId) {
+  if (!recipients || !Array.isArray(recipients)) {
+    throw new Error('expecting array of recipients');
+  }
+
   // Right now we only support 1 recipient
   if (recipients.length != 1) {
     throw new Error("must send to exactly 1 recipient");
@@ -365,8 +369,7 @@ var getOperationSha3ForExecuteAndConfirm = function(recipients, expireTime, sequ
 
   // Check inputs
   recipients.forEach(function(recipient) {
-    if (typeof(recipient.toAddress) !== 'string' ||
-      ethUtil.stripHexPrefix(recipient.toAddress).length !== 40) {
+    if (typeof(recipient.toAddress) !== 'string' || !ethUtil.isValidAddress(ethUtil.addHexPrefix(recipient.toAddress))) {
       throw new Error("Invalid address: " + recipient.toAddress);
     }
 
@@ -422,6 +425,29 @@ EthWallet.prototype.sendTransaction = function(params, callback) {
 
   var EXPIRETIME_DEFAULT = 60 * 60 * 24 * 7; // This signature will be valid for 1 week
 
+  if (!params.recipients || !Array.isArray(params.recipients)) {
+    throw new Error('expecting array of recipients');
+  }
+
+  if (params.recipients.length !== 1) {
+    throw new Error('only 1 recipient currently supported per transaction');
+  }
+
+  // Check inputs
+  params.recipients.forEach(function(recipient) {
+    if (typeof(recipient.toAddress) !== 'string' || !ethUtil.isValidAddress(ethUtil.addHexPrefix(recipient.toAddress))) {
+      throw new Error("Invalid address: " + recipient.toAddress);
+    }
+
+    if (typeof(recipient.value) !== 'string') {
+      throw new Error("Invalid value for: " + recipient.toAddress + ' - should be of type string in wei');
+    }
+
+    if (recipient.data && typeof(recipient.data) !== 'string') {
+      throw new Error("Data for recipient " + recipient.toAddress + ' - should be of type hex string');
+    }
+  });
+
   if (params.expireTime !== undefined) {
     if (typeof(params.expireTime) == 'number') {
       if (params.expireTime < ((new Date().getTime()) / 1000)) {
@@ -453,7 +479,6 @@ EthWallet.prototype.sendTransaction = function(params, callback) {
       operationHash: operationHash,
       signature: signature
     };
-    console.dir(txParams);
 
     return self.bitgo.post(self.url('/tx/send'))
     .send(txParams)

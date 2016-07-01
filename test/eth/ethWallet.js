@@ -252,7 +252,6 @@ describe('Ethereum Wallet API:', function() {
         result.transaction.should.have.property('blockHeight');
       });
     });
-
   });
 
   describe('Transfers', function() {
@@ -308,7 +307,84 @@ describe('Ethereum Wallet API:', function() {
         result.transfers.should.eql(limitedTransfers);
       });
     });
+  });
 
+  describe('Send Transaction', function() {
+    it('arguments', function() {
+      // No recipients provided
+      assert.throws(function() { wallet1.sendTransaction({}, function() {}); });
+      assert.throws(function() { wallet1.sendTransaction({ recipients: [] }, function() {}); });
+
+      // Invalid recipient toAddress
+      assert.throws(function() { wallet1.sendTransaction({
+        recipients: [{ toAddress: 'abc', value: '10000' }],
+        walletPassphrase: 'daodaodao'
+      }, function() {}); });
+
+      // Invalid recipient value
+      assert.throws(function() { wallet1.sendTransaction({
+        recipients: [{ toAddress: '0x9c4545befe9bfec17ffcdfbebe34a7ecc80e9165', value: 10000 }],
+        walletPassphrase: 'daodaodao'
+      }, function() {}); });
+
+      // Invalid recipient data
+      assert.throws(function() { wallet1.sendTransaction({
+        recipients: [{ toAddress: '0x9c4545befe9bfec17ffcdfbebe34a7ecc80e9165', value: '10000', data: 1234 }],
+        walletPassphrase: 'daodaodao'
+      }, function() {}); });
+
+      // Invalid expire time
+      assert.throws(function() { wallet1.sendTransaction({
+        recipients: [{ toAddress: '0x9c4545befe9bfec17ffcdfbebe34a7ecc80e9165', value: '10000' }],
+        expireTime: "asdfadsads",
+        walletPassphrase: 'daodaodao'
+      }, function() {}); });
+    });
+
+    it('missing walletPassphrase', function() {
+      return bitgo.unlock({ otp: '0000000' })
+      .then(function() {
+        return wallet1.sendTransaction({ recipients: [{ toAddress: wallet1.id(), value: '25000' }] });
+      })
+      .then(function(result) {
+        throw new Error("should not be here");
+      })
+      .catch(function(error) {
+        error.message.should.include("walletPassphrase");
+      });
+    });
+
+    it('wrong walletPassphrase', function() {
+      return bitgo.unlock({ otp: '0000000' })
+      .then(function() {
+        return wallet1.sendTransaction({ recipients: [{ toAddress: wallet1.id(), value: '25000' }], walletPassphrase: 'wrong passphrase' });
+      })
+      .then(function(result) {
+        throw new Error("should not be here");
+      })
+      .catch(function(error) {
+        error.message.should.include("Unable to decrypt user keychain");
+      });
+    });
+
+    it('success', function() {
+      var txHash;
+      return bitgo.unlock({ otp: '0000000' })
+      .then(function() {
+        return wallet1.sendTransaction({ recipients: [{ toAddress: wallet1.id(), value: '36000' }], walletPassphrase: TestBitGo.TEST_WALLET1_PASSCODE });
+      })
+      .then(function(result) {
+        result.should.have.property('hash');
+        result.should.have.property('tx');
+        txHash = result.hash;
+        return wallet1.transfers();
+      })
+      .then(function(result) {
+        result.should.have.property('transfers');
+        var txFound = _.some(result.transfers, function(transfer) { return transfer.txHash === txHash; });
+        // txFound.should.eql(true); UNCOMMENT AFTER SERVER FIX
+      });
+    });
   });
 
   describe('Get wallet user encrypted key', function() {
