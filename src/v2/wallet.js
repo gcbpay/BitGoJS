@@ -1,11 +1,12 @@
-var common = require('../common');
-var assert = require('assert');
-var bitcoin = require('../bitcoin');
-var PendingApproval = require('./pendingApproval');
-var Q = require('q');
-var _ = require('lodash');
+const common = require('../common');
+const assert = require('assert');
+const BigNumber = require('bignumber.js');
+const bitcoin = require('../bitcoin');
+const PendingApproval = require('./pendingApproval');
+const Q = require('q');
+const _ = require('lodash');
 
-var Wallet = function(bitgo, baseCoin, walletData) {
+const Wallet = function(bitgo, baseCoin, walletData) {
   this.bitgo = bitgo;
   this.baseCoin = baseCoin;
   this._wallet = walletData;
@@ -28,12 +29,28 @@ Wallet.prototype.balance = function() {
   return this._wallet.balance;
 };
 
-Wallet.prototype.coin = function() {
-  return this._wallet.coin;
-};
-
 Wallet.prototype.confirmedBalance = function() {
   return this._wallet.confirmedBalance;
+};
+
+Wallet.prototype.spendableBalance = function() {
+  return this._wallet.spendableBalance;
+};
+
+Wallet.prototype.balanceString = function() {
+  return this._wallet.balanceString;
+};
+
+Wallet.prototype.confirmedBalanceString = function() {
+  return this._wallet.confirmedBalanceString;
+};
+
+Wallet.prototype.spendableBalanceString = function() {
+  return this._wallet.spendableBalanceString;
+};
+
+Wallet.prototype.coin = function() {
+  return this._wallet.coin;
 };
 
 Wallet.prototype.label = function() {
@@ -111,7 +128,7 @@ Wallet.prototype.freeze = function(params, callback) {
   common.validateParams(params, [], [], callback);
 
   if (params.duration) {
-    if (typeof(params.duration) != 'number') {
+    if (typeof(params.duration) !== 'number') {
       throw new Error('invalid duration: should be number of seconds');
     }
   }
@@ -154,21 +171,21 @@ Wallet.prototype.addresses = function(params, callback) {
   }
 
   if (params.prevId) {
-    if (typeof(params.prevId) != 'number') {
+    if (typeof(params.prevId) !== 'number') {
       throw new Error('invalid prevId argument, expecting number');
     }
     query.prevId = params.prevId;
   }
 
   if (params.sort) {
-    if (typeof(params.sort) != 'number') {
+    if (typeof(params.sort) !== 'number') {
       throw new Error('invalid sort argument, expecting number');
     }
     query.sort = params.sort;
   }
 
   if (params.limit) {
-    if (typeof(params.limit) != 'number') {
+    if (typeof(params.limit) !== 'number') {
       throw new Error('invalid sort argument, expecting number');
     }
     query.limit = params.limit;
@@ -323,16 +340,16 @@ Wallet.prototype.shareWallet = function(params, callback) {
   params = params || {};
   common.validateParams(params, ['email', 'permissions'], ['walletPassphrase', 'message'], callback);
 
-  if (params.reshare !== undefined && typeof(params.reshare) != 'boolean') {
+  if (params.reshare !== undefined && typeof(params.reshare) !== 'boolean') {
     throw new Error('Expected reshare to be a boolean.');
   }
 
-  if (params.skipKeychain !== undefined && typeof(params.skipKeychain) != 'boolean') {
+  if (params.skipKeychain !== undefined && typeof(params.skipKeychain) !== 'boolean') {
     throw new Error('Expected skipKeychain to be a boolean. ');
   }
   var needsKeychain = !params.skipKeychain && params.permissions.indexOf('spend') !== -1;
 
-  if (params.disableEmail !== undefined && typeof(params.disableEmail) != 'boolean') {
+  if (params.disableEmail !== undefined && typeof(params.disableEmail) !== 'boolean') {
     throw new Error('Expected disableEmail to be a boolean.');
   }
 
@@ -460,7 +477,8 @@ Wallet.prototype.signTransaction = function(params, callback) {
   }
   var self = this;
   return Q.fcall(function() {
-    return self.baseCoin.signTransaction({ txPrebuild: txPrebuild, prv: userPrv });
+    const signingParams = _.extend({}, params, { txPrebuild: txPrebuild, prv: userPrv });
+    return self.baseCoin.signTransaction(signingParams);
   })
   .nodeify(callback);
 };
@@ -494,13 +512,17 @@ Wallet.prototype.send = function(params, callback) {
   params = params || {};
   common.validateParams(params, ['address'], ['message'], callback);
 
-  if (typeof(params.amount) != 'number') {
-    throw new Error('invalid argument for amount - number expected');
+  let amount;
+  try {
+    amount = new BigNumber(params.amount);
+    assert(!amount.isNegative());
+  } catch (e) {
+    throw new Error('invalid argument for amount - positive number or numeric string expected');
   }
 
   params.recipients = [{
     address: params.address,
-    amount: params.amount
+    amount: params.amount,
   }];
 
   return this.sendMany(params)
