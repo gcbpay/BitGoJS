@@ -133,12 +133,12 @@ Eth.prototype.signTransaction = function(params) {
 };
 
 /**
- * Ensure the enterpriseId is passed, so we can use the correct Enterprise fee address
+ * Ensure the enterprise is passed, so we can use the correct Enterprise fee address
  * @param params
- * @param params.enterpriseId {String} the enterprise id to associate with this key
+ * @param params.enterprise {String} the enterprise id to associate with this key
  */
 BaseCoin.prototype.preCreateBitGo = function(params) {
-  if (!params || !params.enterpriseId) {
+  if (!params || !params.enterprise) {
     throw new Error('expecting enterpriseId when adding BitGo key');
   }
 };
